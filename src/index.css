@@ -5,31 +5,45 @@
 }
 
 :root {
+  font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark theme (default) */
+[data-theme='dark'] {
+  --bg: #000000;
+  --bg-secondary: #111111;
+  --text: #f5f5f7;
+  --text-secondary: #86868b;
+  --border: #1d1d1f;
+  --accent: #2997ff;
+  --positive: #34c759;
+  --negative: #ff3b30;
+  --pill-bg: #1d1d1f;
+  --pill-active-bg: #2d2d2f;
+  --pill-active-text: #f5f5f7;
+}
+
+/* Light theme */
+[data-theme='light'] {
   --bg: #fafafa;
+  --bg-secondary: #f2f2f7;
   --text: #1d1d1f;
   --text-secondary: #86868b;
   --border: #e5e5e7;
   --accent: #0071e3;
-
-  font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: var(--text);
-  background: var(--bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #000000;
-    --text: #f5f5f7;
-    --text-secondary: #86868b;
-    --border: #1d1d1f;
-    --accent: #2997ff;
-  }
+  --positive: #34c759;
+  --negative: #ff3b30;
+  --pill-bg: #e5e5e7;
+  --pill-active-bg: #d1d1d6;
+  --pill-active-text: #1d1d1f;
 }
 
 body {
   min-height: 100vh;
+  color: var(--text);
+  background: var(--bg);
 }
 
 #root {
