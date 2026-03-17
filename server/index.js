@@ -1,7 +1,9 @@
 import express from 'express';
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
 import { MARKET_MAP, INDEX_SYMBOLS } from './symbols.js';
 import { cacheGet, cacheSet } from './cache.js';
+
+const yahooFinance = new YahooFinance();
 const app = express();
 const PORT = 3001;
 
