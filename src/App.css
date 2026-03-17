@@ -4,23 +4,13 @@
   flex-direction: column;
 }
 
-.logo {
-  padding: 24px 32px;
-  font-family: 'Tanker', sans-serif;
-  font-weight: 400;
-  font-size: 24px;
-  letter-spacing: -0.5px;
-  color: var(--text);
-}
-
-/* Dashboard */
-.dashboard {
+.content {
   flex: 1;
-  padding: 0 32px 32px;
 }
 
-.loading {
+.state-msg {
   display: flex;
+  gap: 12px;
   justify-content: center;
   align-items: center;
   height: 200px;
@@ -28,101 +18,30 @@
   font-size: 15px;
 }
 
-/* Table */
-.stock-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--text-secondary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-.stock-table thead {
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  z-index: 1;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.stock-table th {
-  text-align: left;
-  padding: 10px 12px;
+.content.switching {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.error-banner {
+  text-align: center;
+  padding: 8px;
+  font-size: 13px;
   font-weight: 500;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border);
-}
-
-.stock-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.stock-table tbody tr {
-  transition: background 0.15s;
-}
-
-.stock-table tbody tr:hover {
-  background: rgba(128, 128, 128, 0.06);
-}
-
-.col-symbol {
-  font-weight: 600;
-}
-
-.col-name {
-  color: var(--text-secondary);
-}
-
-.col-price,
-.col-volume,
-.col-cap {
-  font-variant-numeric: tabular-nums;
-}
-
-.col-change,
-.col-percent {
-  font-variant-numeric: tabular-nums;
-}
-
-.up {
-  color: #34c759;
-}
-
-.down {
-  color: #ff3b30;
-}
-
-/* Right-align numbers */
-.col-price,
-.col-change,
-.col-percent,
-.col-volume,
-.col-cap {
-  text-align: right;
-}
-
-.stock-table th.col-price,
-.stock-table th.col-change,
-.stock-table th.col-percent,
-.stock-table th.col-volume,
-.stock-table th.col-cap {
-  text-align: right;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .logo {
-    padding: 16px 20px;
-  }
-
-  .dashboard {
-    padding: 0 12px 20px;
-    overflow-x: auto;
-  }
-
-  .stock-table {
-    font-size: 13px;
-    min-width: 640px;
-  }
+  color: #fff;
+  background: var(--negative);
 }
