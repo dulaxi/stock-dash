@@ -1,0 +1,44 @@
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 32px;
+}
+
+.pill-group {
+  display: flex;
+  gap: 6px;
+}
+
+.pill {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 980px;
+  border: none;
+  background: var(--pill-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pill:hover {
+  background: var(--pill-active-bg);
+}
+
+.pill.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 12px 20px;
+  }
+
+  .pill {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}
