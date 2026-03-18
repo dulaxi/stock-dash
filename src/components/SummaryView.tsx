@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Quote, IndexQuote, Market, NewsItem } from '../types';
 import { Sparkline } from './Sparkline';
+import { Watchlist } from './Watchlist';
 import { getLogoUrl } from '../tickerDomains';
 import './SummaryView.css';
 
@@ -115,6 +116,7 @@ export function SummaryView({ quotes, indices, market }: SummaryViewProps) {
         </div>
 
         <aside className="news-column">
+          <Watchlist quotes={quotes} />
           <h3 className="news-title">Market News</h3>
           <div className="news-list">
             {news.map((n, i) => (
