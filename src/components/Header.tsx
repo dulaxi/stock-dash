@@ -15,22 +15,22 @@ const SPEEDS: { value: PollingSpeed; label: string }[] = [
 ];
 
 export function Header({ theme, onThemeToggle, pollingSpeed, onPollingSpeedChange }: HeaderProps) {
-  const speedLabel = SPEEDS.find(s => s.value === pollingSpeed)?.label ?? '5s';
-
   return (
     <header className="header">
       <div className="header-logo">XTOX</div>
       <div className="header-controls">
-        <span className="live-label">Live · {speedLabel}</span>
-        <select
-          className="speed-select"
-          value={pollingSpeed}
-          onChange={e => onPollingSpeedChange(Number(e.target.value) as PollingSpeed)}
-        >
+        <span className="live-label">Live</span>
+        <div className="speed-pills">
           {SPEEDS.map(s => (
-            <option key={s.value} value={s.value}>{s.label}</option>
+            <button
+              key={s.value}
+              className={`speed-pill ${pollingSpeed === s.value ? 'active' : ''}`}
+              onClick={() => onPollingSpeedChange(s.value)}
+            >
+              {s.label}
+            </button>
           ))}
-        </select>
+        </div>
         <button className="theme-toggle" onClick={onThemeToggle} aria-label="Toggle theme">
           {theme === 'dark' ? '☀' : '☾'}
         </button>

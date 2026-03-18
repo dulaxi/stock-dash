@@ -45,7 +45,7 @@ function App() {
           <div className="state-msg">No data available</div>
         ) : (
           <>
-            {view === 'summary' && <SummaryView quotes={quotes} indices={indices} />}
+            {view === 'summary' && <SummaryView quotes={quotes} indices={indices} market={market} />}
             {view === 'movers' && <TopMoversView quotes={quotes} />}
             {view === 'grid' && <GridView quotes={quotes} />}
           </>

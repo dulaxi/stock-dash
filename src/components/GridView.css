@@ -49,6 +49,16 @@
 
 .grid-table .symbol {
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grid-table .ticker-logo {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  object-fit: contain;
 }
 
 .grid-table .num,

@@ -1,4 +1,5 @@
 import type { Quote } from '../types';
+import { getLogoUrl } from '../tickerDomains';
 import './TopMoversView.css';
 
 interface TopMoversViewProps {
@@ -23,7 +24,17 @@ export function TopMoversView({ quotes }: TopMoversViewProps) {
         <div className="movers-grid">
           {gainers.map(q => (
             <div key={q.symbol} className="mover-card">
-              <div className="mover-symbol">{q.symbol}</div>
+              <div className="mover-symbol">
+                {getLogoUrl(q.symbol) && (
+                  <img
+                    className="mover-logo"
+                    src={getLogoUrl(q.symbol)!}
+                    alt=""
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
+                {q.symbol}
+              </div>
               <div className="mover-price">${q.price?.toFixed(2)}</div>
               <div className="mover-percent up">
                 +{q.changePercent?.toFixed(2)}%
@@ -39,7 +50,17 @@ export function TopMoversView({ quotes }: TopMoversViewProps) {
         <div className="movers-grid">
           {losers.map(q => (
             <div key={q.symbol} className="mover-card">
-              <div className="mover-symbol">{q.symbol}</div>
+              <div className="mover-symbol">
+                {getLogoUrl(q.symbol) && (
+                  <img
+                    className="mover-logo"
+                    src={getLogoUrl(q.symbol)!}
+                    alt=""
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
+                {q.symbol}
+              </div>
               <div className="mover-price">${q.price?.toFixed(2)}</div>
               <div className="mover-percent down">
                 {q.changePercent?.toFixed(2)}%

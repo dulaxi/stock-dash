@@ -27,16 +27,31 @@
   letter-spacing: 0.5px;
 }
 
-.speed-select {
+.speed-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.speed-pill {
   font-family: inherit;
-  font-size: 13px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg-secondary);
-  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 980px;
+  border: none;
+  background: var(--pill-bg);
+  color: var(--text-secondary);
   cursor: pointer;
-  outline: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.speed-pill:hover {
+  background: var(--pill-active-bg);
+}
+
+.speed-pill.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
 }
 
 .theme-toggle {

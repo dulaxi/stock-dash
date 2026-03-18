@@ -7,20 +7,37 @@ const yahooFinance = new YahooFinance();
 const app = express();
 const PORT = 3001;
 
+function mapQuote(q) {
+  return {
+    symbol: q.symbol,
+    price: q.regularMarketPrice,
+    change: q.regularMarketChange,
+    changePercent: q.regularMarketChangePercent,
+    volume: q.regularMarketVolume,
+    marketCap: q.marketCap,
+    open: q.regularMarketOpen,
+    dayHigh: q.regularMarketDayHigh,
+    dayLow: q.regularMarketDayLow,
+    fiftyTwoWeekHigh: q.fiftyTwoWeekHigh,
+    fiftyTwoWeekLow: q.fiftyTwoWeekLow,
+    trailingPE: q.trailingPE,
+  };
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function fetchQuotes(symbols) {
-  const results = await Promise.allSettled(
-    symbols.map(symbol =>
-      yahooFinance.quote(symbol).then(q => ({
-        symbol: q.symbol,
-        price: q.regularMarketPrice,
-        change: q.regularMarketChange,
-        changePercent: q.regularMarketChangePercent,
-      }))
-    )
-  );
-  return results
-    .filter(r => r.status === 'fulfilled')
-    .map(r => r.value);
+  const all = [];
+  const BATCH = 10;
+  for (let i = 0; i < symbols.length; i += BATCH) {
+    const batch = symbols.slice(i, i + BATCH);
+    const results = await Promise.allSettled(
+      batch.map(s => yahooFinance.quote(s).then(mapQuote))
+    );
+    all.push(...results.filter(r => r.status === 'fulfilled').map(r => r.value));
+    if (i + BATCH < symbols.length) await sleep(300);
+  }
+  return all;
 }
 
 // GET /api/quotes/:market (nasdaq | sp500 | dow)
@@ -40,7 +57,7 @@ app.get('/api/quotes/:market', async (req, res) => {
 
   try {
     const data = await fetchQuotes(symbols);
-    cacheSet(cacheKey, data);
+    cacheSet(cacheKey, data, 10000); // 10s cache
     res.json(data);
   } catch (error) {
     console.error(`Error fetching ${market}:`, error);
@@ -75,6 +92,73 @@ app.get('/api/indices', async (_req, res) => {
   } catch (error) {
     console.error('Error fetching indices:', error);
     res.status(500).json({ error: 'Failed to fetch indices' });
+  }
+});
+
+// GET /api/chart/:symbol (intraday)
+app.get('/api/chart/:symbol', async (req, res) => {
+  const symbol = req.params.symbol;
+  const cacheKey = `chart-${symbol}`;
+  const cached = cacheGet(cacheKey);
+  if (cached && !cached.stale) return res.json(cached.data);
+
+  try {
+    const now = new Date();
+    const open = new Date(now);
+    open.setHours(0, 0, 0, 0);
+    const result = await yahooFinance.chart(symbol, { period1: open, period2: now, interval: '5m' });
+    const points = (result.quotes || [])
+      .filter(q => q.close != null)
+      .map(q => ({ time: q.date, close: q.close }));
+    cacheSet(cacheKey, points, 30000); // 30s cache
+    res.json(points);
+  } catch (error) {
+    console.error(`Error fetching chart for ${symbol}:`, error);
+    if (cached?.stale) return res.json(cached.data);
+    res.status(500).json({ error: 'Failed to fetch chart' });
+  }
+});
+
+// GET /api/news
+const NEWS_TICKERS = { nasdaq: ['AAPL', 'NVDA', 'MSFT', 'TSLA', 'META'], sp500: ['SPY', 'AAPL', 'JPM', 'GOOGL', 'AMZN'], dow: ['DIA', 'BA', 'GS', 'UNH', 'MSFT'] };
+app.get('/api/news/:market', async (req, res) => {
+  const market = req.params.market;
+  const tickers = NEWS_TICKERS[market];
+  if (!tickers) return res.status(400).json({ error: 'Invalid market' });
+
+  const cacheKey = `news-${market}`;
+  const cached = cacheGet(cacheKey);
+  if (cached && !cached.stale) return res.json(cached.data);
+
+  try {
+    const results = await Promise.allSettled(
+      tickers.map(t => yahooFinance.search(t, { newsCount: 5, quotesCount: 0 }))
+    );
+    const seen = new Set();
+    const news = results
+      .filter(r => r.status === 'fulfilled')
+      .flatMap(r => r.value.news || [])
+      .filter(n => {
+        if (!n.thumbnail?.resolutions?.[0]?.url) return false;
+        if (seen.has(n.title)) return false;
+        seen.add(n.title);
+        return true;
+      })
+      .sort((a, b) => new Date(b.providerPublishTime).getTime() - new Date(a.providerPublishTime).getTime())
+      .slice(0, 15)
+      .map(n => ({
+        title: n.title,
+        publisher: n.publisher,
+        link: n.link,
+        providerPublishTime: n.providerPublishTime,
+        thumbnail: n.thumbnail.resolutions[0].url,
+      }));
+    cacheSet(cacheKey, news, 60000);
+    res.json(news);
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    if (cached?.stale) return res.json(cached.data);
+    res.status(500).json({ error: 'Failed to fetch news' });
   }
 });
 
