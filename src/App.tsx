@@ -6,6 +6,7 @@ import { Toolbar } from './components/Toolbar';
 import { SummaryView } from './components/SummaryView';
 import { TopMoversView } from './components/TopMoversView';
 import { GridView } from './components/GridView';
+import { StockDetail } from './components/StockDetail';
 import type { Market, View, PollingSpeed } from './types';
 import './App.css';
 
@@ -37,10 +38,10 @@ function App() {
   const [view, setView] = useLocalStorage<View>('xtox-view', 'summary');
   const [pollingSpeed, setPollingSpeed] = useLocalStorage<PollingSpeed>('xtox-speed', 5000);
   const [viewKey, setViewKey] = useState(0);
+  const [selectedStock, setSelectedStock] = useState<string | null>(null);
 
   const { quotes, indices, loading, switching, error } = usePolling(market, pollingSpeed);
 
-  // Trigger view transition animation
   useEffect(() => {
     setViewKey(k => k + 1);
   }, [view]);
@@ -50,6 +51,20 @@ function App() {
     setTheme(next);
     document.documentElement.dataset.theme = next;
   };
+
+  if (selectedStock) {
+    return (
+      <div className="app">
+        <Header
+          theme={theme}
+          onThemeToggle={toggleTheme}
+          pollingSpeed={pollingSpeed}
+          onPollingSpeedChange={setPollingSpeed}
+        />
+        <StockDetail symbol={selectedStock} onBack={() => setSelectedStock(null)} />
+      </div>
+    );
+  }
 
   return (
     <div className="app">
@@ -74,9 +89,9 @@ function App() {
           <div className="state-msg">No data available</div>
         ) : (
           <div key={viewKey} className="view-enter">
-            {view === 'summary' && <SummaryView quotes={quotes} indices={indices} market={market} />}
-            {view === 'movers' && <TopMoversView quotes={quotes} />}
-            {view === 'grid' && <GridView quotes={quotes} />}
+            {view === 'summary' && <SummaryView quotes={quotes} indices={indices} market={market} onSelectStock={setSelectedStock} />}
+            {view === 'movers' && <TopMoversView quotes={quotes} onSelectStock={setSelectedStock} />}
+            {view === 'grid' && <GridView quotes={quotes} onSelectStock={setSelectedStock} />}
           </div>
         )}
       </main>

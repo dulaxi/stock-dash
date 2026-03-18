@@ -1,0 +1,177 @@
+.detail-page {
+  padding: 24px 32px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.detail-back {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+  transition: opacity 0.15s;
+}
+
+.detail-back:hover {
+  opacity: 0.7;
+}
+
+/* Header */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.detail-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.detail-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.detail-name {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.detail-symbol {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.detail-sector {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.detail-price-block {
+  text-align: right;
+}
+
+.detail-price {
+  font-size: 32px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail-change {
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.detail-change.up { color: var(--positive); }
+.detail-change.down { color: var(--negative); }
+
+/* Stats grid */
+.detail-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.stats-col {
+  border-right: 1px solid var(--border);
+}
+
+.stats-col:last-child {
+  border-right: none;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* About */
+.detail-about {
+  margin-top: 24px;
+}
+
+.detail-about h3 {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.detail-about p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Loading */
+.detail-loading {
+  padding: 20px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .detail-page {
+    padding: 16px 20px 32px;
+  }
+
+  .detail-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .detail-price-block {
+    text-align: left;
+  }
+
+  .detail-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-col {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stats-col:last-child {
+    border-bottom: none;
+  }
+}

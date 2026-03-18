@@ -9,6 +9,7 @@ interface SummaryViewProps {
   quotes: Quote[];
   indices: IndexQuote[];
   market: Market;
+  onSelectStock: (symbol: string) => void;
 }
 
 function timeAgo(dateStr: string): string {
@@ -20,7 +21,7 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export function SummaryView({ quotes, indices, market }: SummaryViewProps) {
+export function SummaryView({ quotes, indices, market, onSelectStock }: SummaryViewProps) {
   const top50 = quotes.slice(0, 50);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [charts, setCharts] = useState<Record<string, number[]>>({});
@@ -90,7 +91,7 @@ export function SummaryView({ quotes, indices, market }: SummaryViewProps) {
             </thead>
             <tbody>
               {top50.map(q => (
-                <tr key={q.symbol}>
+                <tr key={q.symbol} className="clickable-row" onClick={() => onSelectStock(q.symbol)}>
                   <td className="symbol">
                 {getLogoUrl(q.symbol) && (
                   <img

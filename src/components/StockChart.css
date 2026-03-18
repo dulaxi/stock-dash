@@ -1,0 +1,65 @@
+.stock-chart {
+  margin-bottom: 24px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.chart-price-display {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chart-hover-price {
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-hover-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.chart-range-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.chart-range-pill {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 980px;
+  border: none;
+  background: var(--pill-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.chart-range-pill:hover {
+  background: var(--pill-active-bg);
+}
+
+.chart-range-pill.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+.chart-loading {
+  border-radius: 8px;
+  height: 260px;
+}

@@ -137,3 +137,8 @@
   0% { background: rgba(255, 59, 48, 0.2); }
   100% { background: transparent; }
 }
+
+/* Clickable rows */
+.clickable-row {
+  cursor: pointer;
+}

@@ -5,6 +5,7 @@ import './GridView.css';
 
 interface GridViewProps {
   quotes: Quote[];
+  onSelectStock: (symbol: string) => void;
 }
 
 type SortKey = keyof Quote;
@@ -18,7 +19,7 @@ function fmt(n?: number): string {
   return n.toLocaleString();
 }
 
-export function GridView({ quotes }: GridViewProps) {
+export function GridView({ quotes, onSelectStock }: GridViewProps) {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
@@ -69,7 +70,7 @@ export function GridView({ quotes }: GridViewProps) {
         </thead>
         <tbody>
           {sorted.map(q => (
-            <tr key={q.symbol}>
+            <tr key={q.symbol} className="clickable-row" onClick={() => onSelectStock(q.symbol)}>
               <td className="symbol">
                 {getLogoUrl(q.symbol) && (
                   <img

@@ -119,6 +119,142 @@ app.get('/api/chart/:symbol', async (req, res) => {
   }
 });
 
+// GET /api/detail/:symbol — full stock detail
+app.get('/api/detail/:symbol', async (req, res) => {
+  const symbol = req.params.symbol;
+  const cacheKey = `detail-${symbol}`;
+  const cached = cacheGet(cacheKey);
+  if (cached && !cached.stale) return res.json(cached.data);
+
+  try {
+    const [quote, summary] = await Promise.all([
+      yahooFinance.quote(symbol),
+      yahooFinance.quoteSummary(symbol, {
+        modules: ['defaultKeyStatistics', 'financialData', 'summaryDetail', 'summaryProfile', 'earningsHistory', 'recommendationTrend']
+      }).catch(() => ({})),
+    ]);
+
+    const ks = summary.defaultKeyStatistics || {};
+    const fd = summary.financialData || {};
+    const sd = summary.summaryDetail || {};
+    const sp = summary.summaryProfile || {};
+    const rt = summary.recommendationTrend?.trend?.[0] || {};
+
+    const data = {
+      symbol: quote.symbol,
+      name: quote.shortName || quote.longName || symbol,
+      price: quote.regularMarketPrice,
+      change: quote.regularMarketChange,
+      changePercent: quote.regularMarketChangePercent,
+      prevClose: quote.regularMarketPreviousClose,
+      open: quote.regularMarketOpen,
+      dayHigh: quote.regularMarketDayHigh,
+      dayLow: quote.regularMarketDayLow,
+      volume: quote.regularMarketVolume,
+      avgVolume: quote.averageDailyVolume3Month,
+      marketCap: quote.marketCap,
+      // Key stats
+      trailingPE: sd.trailingPE,
+      forwardPE: sd.forwardPE ?? ks.forwardPE,
+      peg: ks.pegRatio,
+      priceToBook: ks.priceToBook,
+      priceToSales: sd.priceToSalesTrailing12Months,
+      enterpriseValue: ks.enterpriseValue,
+      evToEbitda: ks.enterpriseToEbitda,
+      evToRevenue: ks.enterpriseToRevenue,
+      // Earnings
+      epsTrailing: ks.trailingEps,
+      epsForward: ks.forwardEps,
+      // Profitability
+      profitMargin: fd.profitMargins,
+      operatingMargin: fd.operatingMargins,
+      grossMargin: fd.grossMargins,
+      returnOnEquity: fd.returnOnEquity,
+      returnOnAssets: fd.returnOnAssets,
+      // Balance sheet
+      debtToEquity: fd.debtToEquity,
+      currentRatio: fd.currentRatio,
+      quickRatio: fd.quickRatio,
+      bookValue: ks.bookValue,
+      // Dividend
+      dividendRate: sd.dividendRate,
+      dividendYield: sd.dividendYield,
+      exDividendDate: sd.exDividendDate,
+      payoutRatio: sd.payoutRatio,
+      // Performance
+      fiftyTwoWeekHigh: sd.fiftyTwoWeekHigh ?? quote.fiftyTwoWeekHigh,
+      fiftyTwoWeekLow: sd.fiftyTwoWeekLow ?? quote.fiftyTwoWeekLow,
+      fiftyDayAvg: sd.fiftyDayAverage,
+      twoHundredDayAvg: sd.twoHundredDayAverage,
+      beta: sd.beta ?? ks.beta,
+      // Shares
+      sharesOutstanding: ks.sharesOutstanding,
+      floatShares: ks.floatShares,
+      shortRatio: ks.shortRatio,
+      shortPercentOfFloat: ks.shortPercentOfFloat,
+      // Company
+      industry: sp.industry,
+      sector: sp.sector,
+      employees: sp.fullTimeEmployees,
+      website: sp.website,
+      description: sp.longBusinessSummary,
+      // Recommendation
+      recommendation: rt.buy != null ? ((rt.strongBuy + rt.buy * 0.75 + rt.hold * 0.5 + rt.sell * 0.25) / (rt.strongBuy + rt.buy + rt.hold + rt.sell + rt.strongSell)).toFixed(2) : null,
+    };
+
+    cacheSet(cacheKey, data, 15000);
+    res.json(data);
+  } catch (error) {
+    console.error(`Error fetching detail for ${symbol}:`, error);
+    if (cached?.stale) return res.json(cached.data);
+    res.status(500).json({ error: 'Failed to fetch detail' });
+  }
+});
+
+// GET /api/history/:symbol?range=1d|5d|1mo|3mo|1y|5y
+app.get('/api/history/:symbol', async (req, res) => {
+  const symbol = req.params.symbol;
+  const range = req.query.range || '1d';
+  const cacheKey = `history-${symbol}-${range}`;
+  const cached = cacheGet(cacheKey);
+  if (cached && !cached.stale) return res.json(cached.data);
+
+  const rangeMap = {
+    '1d': { period1: daysAgo(1), interval: '5m' },
+    '5d': { period1: daysAgo(5), interval: '15m' },
+    '1mo': { period1: daysAgo(30), interval: '1h' },
+    '3mo': { period1: daysAgo(90), interval: '1d' },
+    '1y': { period1: daysAgo(365), interval: '1d' },
+    '5y': { period1: daysAgo(1825), interval: '1wk' },
+  };
+
+  const config = rangeMap[range] || rangeMap['1d'];
+
+  try {
+    const result = await yahooFinance.chart(symbol, {
+      period1: config.period1,
+      period2: new Date(),
+      interval: config.interval,
+    });
+    const points = (result.quotes || [])
+      .filter(q => q.close != null)
+      .map(q => ({ time: q.date, close: q.close, volume: q.volume }));
+    const ttl = range === '1d' ? 30000 : 60000;
+    cacheSet(cacheKey, points, ttl);
+    res.json(points);
+  } catch (error) {
+    console.error(`Error fetching history for ${symbol}:`, error);
+    if (cached?.stale) return res.json(cached.data);
+    res.status(500).json({ error: 'Failed to fetch history' });
+  }
+});
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d;
+}
+
 // GET /api/news
 const NEWS_TICKERS = { nasdaq: ['AAPL', 'NVDA', 'MSFT', 'TSLA', 'META'], sp500: ['SPY', 'AAPL', 'JPM', 'GOOGL', 'AMZN'], dow: ['DIA', 'BA', 'GS', 'UNH', 'MSFT'] };
 app.get('/api/news/:market', async (req, res) => {

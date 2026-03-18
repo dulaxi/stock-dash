@@ -4,9 +4,10 @@ import './TopMoversView.css';
 
 interface TopMoversViewProps {
   quotes: Quote[];
+  onSelectStock: (symbol: string) => void;
 }
 
-export function TopMoversView({ quotes }: TopMoversViewProps) {
+export function TopMoversView({ quotes, onSelectStock }: TopMoversViewProps) {
   const gainers = quotes
     .filter(q => q.changePercent > 0)
     .sort((a, b) => b.changePercent - a.changePercent)
@@ -23,7 +24,7 @@ export function TopMoversView({ quotes }: TopMoversViewProps) {
         <h3 className="movers-title">Gainers</h3>
         <div className="movers-grid">
           {gainers.map(q => (
-            <div key={q.symbol} className="mover-card">
+            <div key={q.symbol} className="mover-card" onClick={() => onSelectStock(q.symbol)} style={{ cursor: 'pointer' }}>
               <div className="mover-symbol">
                 {getLogoUrl(q.symbol) && (
                   <img
@@ -49,7 +50,7 @@ export function TopMoversView({ quotes }: TopMoversViewProps) {
         <h3 className="movers-title">Losers</h3>
         <div className="movers-grid">
           {losers.map(q => (
-            <div key={q.symbol} className="mover-card">
+            <div key={q.symbol} className="mover-card" onClick={() => onSelectStock(q.symbol)} style={{ cursor: 'pointer' }}>
               <div className="mover-symbol">
                 {getLogoUrl(q.symbol) && (
                   <img
