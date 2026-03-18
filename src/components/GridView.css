@@ -41,6 +41,7 @@
 
 .grid-table tbody tr {
   transition: background 0.15s;
+  animation: rowFadeIn 0.2s ease both;
 }
 
 .grid-table tbody tr:hover {
@@ -72,6 +73,6 @@
   }
 
   .grid-table {
-    min-width: 400px;
+    min-width: 900px;
   }
 }

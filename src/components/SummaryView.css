@@ -14,7 +14,12 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
+  animation: fadeIn 0.3s ease both;
 }
+
+.index-card:nth-child(1) { animation-delay: 0s; }
+.index-card:nth-child(2) { animation-delay: 0.05s; }
+.index-card:nth-child(3) { animation-delay: 0.1s; }
 
 .index-name {
   font-size: 12px;
@@ -87,6 +92,7 @@
 
 .summary-table tbody tr {
   transition: background 0.15s;
+  animation: rowFadeIn 0.3s ease both;
 }
 
 .summary-table tbody tr:hover {
@@ -144,11 +150,13 @@
   border-radius: 10px;
   padding: 10px;
   margin: -10px;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
+  animation: rowFadeIn 0.3s ease both;
 }
 
 .news-card:hover {
   background: var(--bg-secondary);
+  transform: translateX(2px);
 }
 
 .svg-filters {

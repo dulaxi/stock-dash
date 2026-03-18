@@ -28,11 +28,13 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 10px;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
+  animation: rowFadeIn 0.3s ease both;
 }
 
 .mover-card:hover {
   background: var(--pill-active-bg);
+  transform: translateX(2px);
 }
 
 .mover-symbol {
