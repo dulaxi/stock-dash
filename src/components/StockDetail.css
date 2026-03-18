@@ -80,46 +80,41 @@
 .detail-change.up { color: var(--positive); }
 .detail-change.down { color: var(--negative); }
 
-/* Stats grid */
-.detail-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0;
+/* Stats table — Finviz style */
+.detail-stats-table {
+  width: 100%;
+  border-collapse: collapse;
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 24px;
-}
-
-.stats-col {
-  border-right: 1px solid var(--border);
-}
-
-.stats-col:last-child {
-  border-right: none;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--border);
   font-size: 12px;
+  table-layout: fixed;
 }
 
-.stat-row:last-child {
-  border-bottom: none;
+.detail-stats-table td {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.stat-label {
+.detail-stats-table .stat-label {
   color: var(--text-secondary);
   font-weight: 500;
+  width: 110px;
+  background: var(--bg-secondary);
 }
 
-.stat-value {
+.detail-stats-table .stat-value {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: right;
+}
+
+.detail-stats-table tr:last-child td {
+  border-bottom: none;
 }
 
 /* About */
@@ -162,16 +157,8 @@
     text-align: left;
   }
 
-  .detail-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .stats-col {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .stats-col:last-child {
-    border-bottom: none;
+  .detail-stats-table {
+    display: block;
+    overflow-x: auto;
   }
 }
