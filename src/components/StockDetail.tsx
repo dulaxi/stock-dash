@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { NewsItem } from '../types';
 import { StockChart } from './StockChart';
+import { FlashDiv } from './FlashCell';
 import { getLogoUrl } from '../tickerDomains';
 import './StockDetail.css';
 
@@ -64,6 +65,24 @@ interface Detail {
   country?: string;
   ceo?: string;
   recommendation?: string;
+  targetPrice?: number;
+  targetHigh?: number;
+  targetLow?: number;
+  numberOfAnalysts?: number;
+  recommendationKey?: string;
+  insiderTransactions?: { name: string; relation: string; date: string; type: string; shares: number; value: number }[];
+  institutionHolders?: { name: string; shares: number; value: number; pctHeld: number; change: number }[];
+  insidersPercentHeld?: number;
+  institutionsPercentHeld?: number;
+  analystActions?: { firm: string; toGrade: string; fromGrade: string; action: string; date: number }[];
+  earningsHistory?: { date: string; epsEstimate: number; epsActual: number; surprise: number }[];
+  earningsTrend?: { period: string; endDate: string; epsEstimate: number; revenueEstimate: number }[];
+  esgScore?: number;
+  envScore?: number;
+  socialScore?: number;
+  govScore?: number;
+  esgPerformance?: string;
+  secFilings?: { type: string; title: string; date: string; url: string }[];
 }
 
 function fmt(n?: number, decimals = 2): string {
@@ -137,10 +156,15 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/detail/${encodeURIComponent(symbol)}`)
-      .then(r => r.json())
-      .then(d => { setDetail(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    const fetchDetail = () => {
+      fetch(`/api/detail/${encodeURIComponent(symbol)}`)
+        .then(r => r.json())
+        .then(d => { setDetail(d); setLoading(false); })
+        .catch(() => setLoading(false));
+    };
+    fetchDetail();
+    const interval = setInterval(fetchDetail, 10000);
+    return () => clearInterval(interval);
   }, [symbol]);
 
   useEffect(() => {
@@ -203,7 +227,7 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
           </div>
         </div>
         <div className="detail-price-block">
-          <div className="detail-price">${detail.price?.toFixed(2)}</div>
+          <FlashDiv value={detail.price} className="detail-price">${detail.price?.toFixed(2)}</FlashDiv>
           <div className={`detail-change ${detail.changePercent > 0 ? 'up' : detail.changePercent < 0 ? 'down' : ''}`}>
             {detail.change > 0 ? '+' : ''}{detail.change?.toFixed(2)} ({detail.changePercent > 0 ? '+' : ''}{detail.changePercent?.toFixed(2)}%)
           </div>
@@ -266,6 +290,224 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
           ))}
         </tbody>
       </table>
+
+      {/* Analyst Price Target */}
+      {detail.targetPrice && (
+        <div className="detail-section">
+          <h3 className="detail-section-title">Analyst Price Target</h3>
+          <div className="target-bar-container">
+            <div className="target-labels">
+              <span className="down">${detail.targetLow?.toFixed(2)}</span>
+              <span className="target-current">${detail.price?.toFixed(2)}</span>
+              <span className="up">${detail.targetHigh?.toFixed(2)}</span>
+            </div>
+            <div className="target-bar">
+              {(() => {
+                const low = detail.targetLow || detail.price;
+                const high = detail.targetHigh || detail.price;
+                const range = high - low || 1;
+                const currentPct = ((detail.price - low) / range) * 100;
+                const targetPct = ((detail.targetPrice - low) / range) * 100;
+                return (
+                  <>
+                    <div className="target-bar-fill" />
+                    <div className="target-marker current" style={{ left: `${Math.max(0, Math.min(100, currentPct))}%` }} title="Current" />
+                    <div className="target-marker target" style={{ left: `${Math.max(0, Math.min(100, targetPct))}%` }} title="Target" />
+                  </>
+                );
+              })()}
+            </div>
+            <div className="target-meta">
+              <span>Mean target: <strong>${detail.targetPrice?.toFixed(2)}</strong></span>
+              {detail.numberOfAnalysts && <span>{detail.numberOfAnalysts} analysts</span>}
+              {detail.recommendationKey && <span className="rec-badge">{detail.recommendationKey}</span>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Earnings History */}
+      {detail.earningsHistory && detail.earningsHistory.length > 0 && (
+        <div className="detail-section">
+          <h3 className="detail-section-title">Earnings History</h3>
+          <table className="detail-mini-table">
+            <thead>
+              <tr>
+                <th>Quarter</th>
+                <th className="num">Estimate</th>
+                <th className="num">Actual</th>
+                <th className="num">Surprise</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detail.earningsHistory.map((e, i) => (
+                <tr key={i}>
+                  <td>{e.date ? new Date(e.date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : '—'}</td>
+                  <td className="num">{e.epsEstimate?.toFixed(2) ?? '—'}</td>
+                  <td className="num">{e.epsActual?.toFixed(2) ?? '—'}</td>
+                  <td className={`num ${e.surprise > 0 ? 'up' : e.surprise < 0 ? 'down' : ''}`}>
+                    {e.surprise != null ? `${e.surprise > 0 ? '+' : ''}${(e.surprise * 100).toFixed(1)}%` : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Analyst Upgrades/Downgrades */}
+      {detail.analystActions && detail.analystActions.length > 0 && (
+        <div className="detail-section">
+          <h3 className="detail-section-title">Analyst Ratings</h3>
+          <table className="detail-mini-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Firm</th>
+                <th>Action</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detail.analystActions.map((a, i) => (
+                <tr key={i}>
+                  <td>{a.date ? new Date(a.date * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}</td>
+                  <td>{a.firm}</td>
+                  <td className={a.action === 'upgrade' ? 'up' : a.action === 'downgrade' ? 'down' : ''}>{a.action}</td>
+                  <td>{a.fromGrade ? `${a.fromGrade} → ` : ''}{a.toGrade}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Insider Transactions */}
+      {detail.insiderTransactions && detail.insiderTransactions.length > 0 && (
+        <div className="detail-section">
+          <h3 className="detail-section-title">Insider Transactions</h3>
+          <table className="detail-mini-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Relation</th>
+                <th>Type</th>
+                <th className="num">Shares</th>
+                <th className="num">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detail.insiderTransactions.map((t, i) => (
+                <tr key={i}>
+                  <td>{t.name}</td>
+                  <td className="muted">{t.relation}</td>
+                  <td className={t.shares > 0 ? 'up' : 'down'}>{t.type}</td>
+                  <td className="num">{Math.abs(t.shares).toLocaleString()}</td>
+                  <td className="num">{t.value ? '$' + fmt(Math.abs(t.value)) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Institutional Holders */}
+      {detail.institutionHolders && detail.institutionHolders.length > 0 && (
+        <div className="detail-section">
+          <h3 className="detail-section-title">Top Institutional Holders</h3>
+          {(detail.insidersPercentHeld || detail.institutionsPercentHeld) && (
+            <div className="ownership-bar-wrap">
+              <div className="ownership-bar">
+                {detail.institutionsPercentHeld && (
+                  <div className="ownership-segment inst" style={{ width: `${(detail.institutionsPercentHeld * 100).toFixed(1)}%` }}>
+                    {(detail.institutionsPercentHeld * 100).toFixed(1)}% Institutions
+                  </div>
+                )}
+                {detail.insidersPercentHeld && (
+                  <div className="ownership-segment insider" style={{ width: `${(detail.insidersPercentHeld * 100).toFixed(1)}%` }}>
+                    {(detail.insidersPercentHeld * 100).toFixed(1)}% Insiders
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <table className="detail-mini-table">
+            <thead>
+              <tr>
+                <th>Institution</th>
+                <th className="num">Shares</th>
+                <th className="num">Value</th>
+                <th className="num">% Held</th>
+                <th className="num">Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detail.institutionHolders.map((h, i) => (
+                <tr key={i}>
+                  <td>{h.name}</td>
+                  <td className="num">{fmt(h.shares, 0)}</td>
+                  <td className="num">${fmt(h.value)}</td>
+                  <td className="num">{h.pctHeld ? (h.pctHeld * 100).toFixed(2) + '%' : '—'}</td>
+                  <td className={`num ${h.change > 0 ? 'up' : h.change < 0 ? 'down' : ''}`}>
+                    {h.change ? `${h.change > 0 ? '+' : ''}${(h.change * 100).toFixed(1)}%` : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ESG Scores */}
+      {detail.esgScore != null && (
+        <div className="detail-section">
+          <h3 className="detail-section-title">ESG Scores</h3>
+          <div className="esg-grid">
+            <div className="esg-card">
+              <div className="esg-score">{detail.esgScore?.toFixed(1)}</div>
+              <div className="esg-label">Total ESG</div>
+            </div>
+            <div className="esg-card">
+              <div className="esg-score env">{detail.envScore?.toFixed(1)}</div>
+              <div className="esg-label">Environment</div>
+            </div>
+            <div className="esg-card">
+              <div className="esg-score social">{detail.socialScore?.toFixed(1)}</div>
+              <div className="esg-label">Social</div>
+            </div>
+            <div className="esg-card">
+              <div className="esg-score gov">{detail.govScore?.toFixed(1)}</div>
+              <div className="esg-label">Governance</div>
+            </div>
+          </div>
+          {detail.esgPerformance && <div className="esg-perf">Performance: {detail.esgPerformance}</div>}
+        </div>
+      )}
+
+      {/* SEC Filings */}
+      {detail.secFilings && detail.secFilings.length > 0 && (
+        <div className="detail-section">
+          <h3 className="detail-section-title">SEC Filings</h3>
+          <table className="detail-mini-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Title</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detail.secFilings.map((f, i) => (
+                <tr key={i}>
+                  <td>{f.date ? new Date(f.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                  <td><strong>{f.type}</strong></td>
+                  <td>{f.url ? <a href={f.url} target="_blank" rel="noopener noreferrer" className="filing-link">{f.title || f.type}</a> : (f.title || '—')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {news.length > 0 && <NewsSection news={news} symbol={detail.symbol} />}
 

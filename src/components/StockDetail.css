@@ -253,6 +253,210 @@
   color: var(--text-secondary);
 }
 
+/* Sections */
+.detail-section {
+  margin-top: 32px;
+}
+
+/* Mini tables (earnings, analysts, insiders, etc.) */
+.detail-mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.detail-mini-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.detail-mini-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-mini-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail-mini-table th.num {
+  text-align: right;
+}
+
+.detail-mini-table .muted {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.detail-mini-table tbody tr {
+  transition: background 0.15s;
+}
+
+.detail-mini-table tbody tr:hover {
+  background: rgba(128, 128, 128, 0.06);
+}
+
+.up { color: var(--positive); }
+.down { color: var(--negative); }
+
+/* Analyst Price Target Bar */
+.target-bar-container {
+  margin-top: 8px;
+}
+
+.target-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 6px;
+}
+
+.target-current {
+  font-weight: 700;
+}
+
+.target-bar {
+  position: relative;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.target-bar-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--negative), var(--text-secondary), var(--positive));
+  border-radius: 4px;
+  opacity: 0.3;
+}
+
+.target-marker {
+  position: absolute;
+  top: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+.target-marker.current {
+  background: var(--text);
+  border: 2px solid var(--bg);
+}
+
+.target-marker.target {
+  background: var(--accent);
+  border: 2px solid var(--bg);
+}
+
+.target-meta {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.rec-badge {
+  padding: 2px 8px;
+  border-radius: 980px;
+  background: var(--pill-bg);
+  font-weight: 600;
+  text-transform: capitalize;
+  font-size: 11px;
+}
+
+/* Ownership bar */
+.ownership-bar-wrap {
+  margin: 8px 0 12px;
+}
+
+.ownership-bar {
+  display: flex;
+  height: 24px;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ownership-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  white-space: nowrap;
+  padding: 0 8px;
+}
+
+.ownership-segment.inst {
+  background: var(--accent);
+}
+
+.ownership-segment.insider {
+  background: var(--positive);
+}
+
+/* ESG */
+.esg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.esg-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.esg-score {
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.esg-score.env { color: var(--positive); }
+.esg-score.social { color: var(--accent); }
+.esg-score.gov { color: #f59e0b; }
+
+.esg-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.esg-perf {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+/* SEC Filing links */
+.filing-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.filing-link:hover {
+  text-decoration: underline;
+}
+
 /* Loading */
 .detail-loading {
   padding: 20px 0;

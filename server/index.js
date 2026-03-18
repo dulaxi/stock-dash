@@ -130,7 +130,12 @@ app.get('/api/detail/:symbol', async (req, res) => {
     const [quote, summary] = await Promise.all([
       yahooFinance.quote(symbol),
       yahooFinance.quoteSummary(symbol, {
-        modules: ['defaultKeyStatistics', 'financialData', 'summaryDetail', 'summaryProfile', 'earningsHistory', 'recommendationTrend']
+        modules: [
+          'defaultKeyStatistics', 'financialData', 'summaryDetail', 'summaryProfile',
+          'earningsHistory', 'recommendationTrend', 'upgradeDowngradeHistory',
+          'insiderTransactions', 'institutionOwnership', 'majorHoldersBreakdown',
+          'esgScores', 'secFilings', 'earningsTrend'
+        ]
       }).catch(() => ({})),
     ]);
 
@@ -139,6 +144,14 @@ app.get('/api/detail/:symbol', async (req, res) => {
     const sd = summary.summaryDetail || {};
     const sp = summary.summaryProfile || {};
     const rt = summary.recommendationTrend?.trend?.[0] || {};
+    const udh = summary.upgradeDowngradeHistory?.history || [];
+    const it = summary.insiderTransactions?.transactions || [];
+    const io = summary.institutionOwnership?.ownershipList || [];
+    const mh = summary.majorHoldersBreakdown || {};
+    const esg = summary.esgScores || {};
+    const eh = summary.earningsHistory?.history || [];
+    const et = summary.earningsTrend?.trend || [];
+    const sf = summary.secFilings?.filings || [];
 
     const data = {
       symbol: quote.symbol,
@@ -204,6 +217,66 @@ app.get('/api/detail/:symbol', async (req, res) => {
       ceo: sp.companyOfficers?.[0]?.name,
       // Recommendation
       recommendation: rt.buy != null ? ((rt.strongBuy + rt.buy * 0.75 + rt.hold * 0.5 + rt.sell * 0.25) / (rt.strongBuy + rt.buy + rt.hold + rt.sell + rt.strongSell)).toFixed(2) : null,
+      targetPrice: fd.targetMeanPrice,
+      targetHigh: fd.targetHighPrice,
+      targetLow: fd.targetLowPrice,
+      numberOfAnalysts: fd.numberOfAnalystOpinions,
+      recommendationKey: fd.recommendationKey,
+      // Insider transactions
+      insiderTransactions: it.slice(0, 10).map(t => ({
+        name: t.filerName,
+        relation: t.filerRelation,
+        date: t.startDate,
+        type: t.moneyText || (t.shares > 0 ? 'Buy' : 'Sale'),
+        shares: t.shares,
+        value: t.value,
+      })),
+      // Institutional holders
+      institutionHolders: io.slice(0, 10).map(h => ({
+        name: h.organization,
+        shares: h.position,
+        value: h.value,
+        pctHeld: h.pctHeld,
+        change: h.pctChange,
+      })),
+      // Ownership breakdown
+      insidersPercentHeld: mh.insidersPercentHeld,
+      institutionsPercentHeld: mh.institutionsPercentHeld,
+      // Upgrade/downgrade history
+      analystActions: udh.slice(0, 10).map(a => ({
+        firm: a.firm,
+        toGrade: a.toGrade,
+        fromGrade: a.fromGrade,
+        action: a.action,
+        date: a.epochGradeDate,
+      })),
+      // Earnings history
+      earningsHistory: eh.map(e => ({
+        date: e.quarter,
+        epsEstimate: e.epsEstimate,
+        epsActual: e.epsActual,
+        surprise: e.surprisePercent,
+      })),
+      // Earnings trend (future estimates)
+      earningsTrend: et.slice(0, 4).map(e => ({
+        period: e.period,
+        endDate: e.endDate,
+        epsEstimate: e.earningsEstimate?.avg,
+        revenueEstimate: e.revenueEstimate?.avg,
+      })),
+      // ESG
+      esgScore: esg.totalEsg,
+      envScore: esg.environmentScore,
+      socialScore: esg.socialScore,
+      govScore: esg.governanceScore,
+      esgPerformance: esg.esgPerformance,
+      // SEC Filings
+      secFilings: sf.slice(0, 8).map(f => ({
+        type: f.type,
+        title: f.title,
+        date: f.date,
+        url: f.edgarUrl,
+      })),
     };
 
     cacheSet(cacheKey, data, 15000);
@@ -224,8 +297,9 @@ app.get('/api/history/:symbol', async (req, res) => {
   if (cached && !cached.stale) return res.json(cached.data);
 
   const ytdStart = new Date(new Date().getFullYear(), 0, 1);
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
   const rangeMap = {
-    '1d': { period1: daysAgo(1), interval: '5m' },
+    '1d': { period1: todayStart, interval: '5m' },
     '5d': { period1: daysAgo(5), interval: '15m' },
     '1mo': { period1: daysAgo(30), interval: '1h' },
     '3mo': { period1: daysAgo(90), interval: '1d' },

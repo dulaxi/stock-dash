@@ -3,6 +3,7 @@ import type { Quote } from '../types';
 import { Sparkline } from './Sparkline';
 import { getLogoUrl } from '../tickerDomains';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { FlashDiv } from './FlashCell';
 import './Watchlist.css';
 
 interface WatchlistProps {
@@ -137,7 +138,7 @@ export function Watchlist({ quotes }: WatchlistProps) {
                     )}
                     <span className="watchlist-card-symbol">{t}</span>
                   </div>
-                  <div className="watchlist-card-price">${q.price?.toFixed(2)}</div>
+                  <FlashDiv value={q.price} className="watchlist-card-price">${q.price?.toFixed(2)}</FlashDiv>
                   <div className={`watchlist-card-change ${q.changePercent > 0 ? 'up' : q.changePercent < 0 ? 'down' : ''}`}>
                     {q.changePercent > 0 ? '+' : ''}{q.changePercent?.toFixed(2)}%
                   </div>
