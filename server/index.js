@@ -133,8 +133,7 @@ app.get('/api/detail/:symbol', async (req, res) => {
         modules: [
           'defaultKeyStatistics', 'financialData', 'summaryDetail', 'summaryProfile',
           'earningsHistory', 'recommendationTrend', 'upgradeDowngradeHistory',
-          'insiderTransactions', 'institutionOwnership', 'majorHoldersBreakdown',
-          'esgScores', 'secFilings', 'earningsTrend'
+          'insiderTransactions', 'institutionOwnership', 'majorHoldersBreakdown'
         ]
       }).catch(() => ({})),
     ]);
@@ -148,10 +147,7 @@ app.get('/api/detail/:symbol', async (req, res) => {
     const it = summary.insiderTransactions?.transactions || [];
     const io = summary.institutionOwnership?.ownershipList || [];
     const mh = summary.majorHoldersBreakdown || {};
-    const esg = summary.esgScores || {};
     const eh = summary.earningsHistory?.history || [];
-    const et = summary.earningsTrend?.trend || [];
-    const sf = summary.secFilings?.filings || [];
 
     const data = {
       symbol: quote.symbol,
@@ -256,26 +252,6 @@ app.get('/api/detail/:symbol', async (req, res) => {
         epsEstimate: e.epsEstimate,
         epsActual: e.epsActual,
         surprise: e.surprisePercent,
-      })),
-      // Earnings trend (future estimates)
-      earningsTrend: et.slice(0, 4).map(e => ({
-        period: e.period,
-        endDate: e.endDate,
-        epsEstimate: e.earningsEstimate?.avg,
-        revenueEstimate: e.revenueEstimate?.avg,
-      })),
-      // ESG
-      esgScore: esg.totalEsg,
-      envScore: esg.environmentScore,
-      socialScore: esg.socialScore,
-      govScore: esg.governanceScore,
-      esgPerformance: esg.esgPerformance,
-      // SEC Filings
-      secFilings: sf.slice(0, 8).map(f => ({
-        type: f.type,
-        title: f.title,
-        date: f.date,
-        url: f.edgarUrl,
       })),
     };
 
