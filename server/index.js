@@ -198,6 +198,10 @@ app.get('/api/detail/:symbol', async (req, res) => {
       employees: sp.fullTimeEmployees,
       website: sp.website,
       description: sp.longBusinessSummary,
+      city: sp.city,
+      state: sp.state,
+      country: sp.country,
+      ceo: sp.companyOfficers?.[0]?.name,
       // Recommendation
       recommendation: rt.buy != null ? ((rt.strongBuy + rt.buy * 0.75 + rt.hold * 0.5 + rt.sell * 0.25) / (rt.strongBuy + rt.buy + rt.hold + rt.sell + rt.strongSell)).toFixed(2) : null,
     };
@@ -219,13 +223,16 @@ app.get('/api/history/:symbol', async (req, res) => {
   const cached = cacheGet(cacheKey);
   if (cached && !cached.stale) return res.json(cached.data);
 
+  const ytdStart = new Date(new Date().getFullYear(), 0, 1);
   const rangeMap = {
     '1d': { period1: daysAgo(1), interval: '5m' },
     '5d': { period1: daysAgo(5), interval: '15m' },
     '1mo': { period1: daysAgo(30), interval: '1h' },
     '3mo': { period1: daysAgo(90), interval: '1d' },
+    'ytd': { period1: ytdStart, interval: '1d' },
     '1y': { period1: daysAgo(365), interval: '1d' },
     '5y': { period1: daysAgo(1825), interval: '1wk' },
+    'all': { period1: new Date('1970-01-01'), interval: '1mo' },
   };
 
   const config = rangeMap[range] || rangeMap['1d'];
@@ -293,6 +300,33 @@ app.get('/api/news/:market', async (req, res) => {
     res.json(news);
   } catch (error) {
     console.error('Error fetching news:', error);
+    if (cached?.stale) return res.json(cached.data);
+    res.status(500).json({ error: 'Failed to fetch news' });
+  }
+});
+
+// GET /api/ticker-news/:symbol — news for a specific ticker
+app.get('/api/ticker-news/:symbol', async (req, res) => {
+  const symbol = req.params.symbol;
+  const cacheKey = `ticker-news-${symbol}`;
+  const cached = cacheGet(cacheKey);
+  if (cached && !cached.stale) return res.json(cached.data);
+
+  try {
+    const result = await yahooFinance.search(symbol, { newsCount: 15, quotesCount: 0 });
+    const news = (result.news || [])
+      .filter(n => n.thumbnail?.resolutions?.[0]?.url)
+      .map(n => ({
+        title: n.title,
+        publisher: n.publisher,
+        link: n.link,
+        providerPublishTime: n.providerPublishTime,
+        thumbnail: n.thumbnail.resolutions[0].url,
+      }));
+    cacheSet(cacheKey, news, 60000);
+    res.json(news);
+  } catch (error) {
+    console.error(`Error fetching news for ${symbol}:`, error);
     if (cached?.stale) return res.json(cached.data);
     res.status(500).json({ error: 'Failed to fetch news' });
   }

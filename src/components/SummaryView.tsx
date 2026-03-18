@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Quote, IndexQuote, Market, NewsItem } from '../types';
 import { Sparkline } from './Sparkline';
 import { Watchlist } from './Watchlist';
+import { FlashCell, FlashDiv } from './FlashCell';
 import { getLogoUrl } from '../tickerDomains';
 import './SummaryView.css';
 
@@ -65,7 +66,7 @@ export function SummaryView({ quotes, indices, market, onSelectStock }: SummaryV
         {indices.map(idx => (
           <div key={idx.symbol} className="index-card">
             <div className="index-name">{idx.name}</div>
-            <div className="index-price">{idx.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <FlashDiv value={idx.price} className="index-price">{idx.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</FlashDiv>
             <div className={`index-change ${idx.changePercent > 0 ? 'up' : idx.changePercent < 0 ? 'down' : ''}`}>
               {idx.changePercent > 0 ? '+' : ''}{idx.change?.toFixed(2)} ({idx.changePercent > 0 ? '+' : ''}{idx.changePercent?.toFixed(2)}%)
             </div>
@@ -103,7 +104,7 @@ export function SummaryView({ quotes, indices, market, onSelectStock }: SummaryV
                 )}
                 {q.symbol}
               </td>
-                  <td className="num">${q.price?.toFixed(2)}</td>
+                  <FlashCell value={q.price} className="num">${q.price?.toFixed(2)}</FlashCell>
                   <td className={`num ${q.change > 0 ? 'up' : q.change < 0 ? 'down' : ''}`}>
                     {q.change > 0 ? '+' : ''}{q.change?.toFixed(2)}
                   </td>

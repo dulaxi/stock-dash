@@ -16,8 +16,10 @@ const RANGES = [
   { key: '5d', label: '5D' },
   { key: '1mo', label: '1M' },
   { key: '3mo', label: '3M' },
+  { key: 'ytd', label: 'YTD' },
   { key: '1y', label: '1Y' },
   { key: '5y', label: '5Y' },
+  { key: 'all', label: 'ALL' },
 ];
 
 export function StockChart({ symbol }: StockChartProps) {
@@ -29,10 +31,19 @@ export function StockChart({ symbol }: StockChartProps) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/history/${encodeURIComponent(symbol)}?range=${range}`)
-      .then(r => r.json())
-      .then(d => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    const fetchChart = () => {
+      fetch(`/api/history/${encodeURIComponent(symbol)}?range=${range}`)
+        .then(r => r.json())
+        .then(d => { setData(d); setLoading(false); })
+        .catch(() => setLoading(false));
+    };
+    fetchChart();
+    // Poll intraday ranges every 30s
+    const liveRanges = ['1d', '5d'];
+    const interval = liveRanges.includes(range)
+      ? setInterval(fetchChart, 30000)
+      : null;
+    return () => { if (interval) clearInterval(interval); };
   }, [symbol, range]);
 
   const width = 700;
@@ -61,16 +72,19 @@ export function StockChart({ symbol }: StockChartProps) {
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     if (!svgRef.current || data.length === 0) return;
     const rect = svgRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const ratio = (x - pad.left) / cw;
+    const scale = width / rect.width;
+    const svgX = (e.clientX - rect.left) * scale;
+    const ratio = (svgX - pad.left) / cw;
     const idx = Math.max(0, Math.min(data.length - 1, Math.round(ratio * (data.length - 1))));
     setHover({ x: toX(idx), idx });
   };
 
   const hoverPoint = hover ? data[hover.idx] : null;
-  const displayPrice = hoverPoint?.close ?? (closes.length > 0 ? closes[closes.length - 1] : 0);
-  const displayTime = hoverPoint
-    ? new Date(hoverPoint.time).toLocaleString(undefined, {
+  const latestPoint = data.length > 0 ? data[data.length - 1] : null;
+  const activePoint = hoverPoint || latestPoint;
+  const displayPrice = activePoint?.close ?? 0;
+  const displayTime = activePoint
+    ? new Date(activePoint.time).toLocaleString(undefined, {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
       })
     : '';

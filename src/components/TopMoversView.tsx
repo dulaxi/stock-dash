@@ -1,5 +1,6 @@
 import type { Quote } from '../types';
 import { getLogoUrl } from '../tickerDomains';
+import { FlashDiv } from './FlashCell';
 import './TopMoversView.css';
 
 interface TopMoversViewProps {
@@ -36,7 +37,7 @@ export function TopMoversView({ quotes, onSelectStock }: TopMoversViewProps) {
                 )}
                 {q.symbol}
               </div>
-              <div className="mover-price">${q.price?.toFixed(2)}</div>
+              <FlashDiv value={q.price} className="mover-price">${q.price?.toFixed(2)}</FlashDiv>
               <div className="mover-percent up">
                 +{q.changePercent?.toFixed(2)}%
               </div>
@@ -62,7 +63,7 @@ export function TopMoversView({ quotes, onSelectStock }: TopMoversViewProps) {
                 )}
                 {q.symbol}
               </div>
-              <div className="mover-price">${q.price?.toFixed(2)}</div>
+              <FlashDiv value={q.price} className="mover-price">${q.price?.toFixed(2)}</FlashDiv>
               <div className="mover-percent down">
                 {q.changePercent?.toFixed(2)}%
               </div>

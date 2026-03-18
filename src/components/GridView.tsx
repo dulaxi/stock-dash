@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Quote } from '../types';
 import { getLogoUrl } from '../tickerDomains';
+import { FlashCell } from './FlashCell';
 import './GridView.css';
 
 interface GridViewProps {
@@ -82,7 +83,7 @@ export function GridView({ quotes, onSelectStock }: GridViewProps) {
                 )}
                 {q.symbol}
               </td>
-              <td className="num">${q.price?.toFixed(2)}</td>
+              <FlashCell value={q.price} className="num">${q.price?.toFixed(2)}</FlashCell>
               <td className={`num ${q.change > 0 ? 'up' : q.change < 0 ? 'down' : ''}`}>
                 {q.change > 0 ? '+' : ''}{q.change?.toFixed(2)}
               </td>

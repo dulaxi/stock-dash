@@ -59,6 +59,10 @@ interface Detail {
   employees?: number;
   website?: string;
   description?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  ceo?: string;
   recommendation?: string;
 }
 
@@ -84,6 +88,48 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
+function NewsSection({ news, symbol }: { news: NewsItem[]; symbol: string }) {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? news : news.slice(0, 5);
+
+  return (
+    <div className="detail-news">
+      <h3 className="detail-section-title">{symbol} News</h3>
+      <div className="detail-news-list">
+        {visible.map((n, i) => (
+          <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" className="detail-news-card">
+            <img className="detail-news-thumb" src={n.thumbnail!} alt="" />
+            <div className="detail-news-body">
+              <div className="detail-news-headline">{n.title}</div>
+              <div className="detail-news-meta">
+                <span>{n.publisher}</span>
+                <span>{timeAgo(n.providerPublishTime)}</span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+      {news.length > 5 && (
+        <button className="show-more-btn" onClick={() => setShowAll(!showAll)} style={{ marginTop: 12 }}>
+          {showAll ? 'Show less' : `Show all ${news.length} articles`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ExpandableText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="expandable-text">
+      <p className={`detail-description ${expanded ? 'expanded' : ''}`}>{text}</p>
+      <button className="show-more-btn" onClick={() => setExpanded(!expanded)}>
+        {expanded ? 'Show less' : 'Show more'}
+      </button>
+    </div>
+  );
+}
+
 export function StockDetail({ symbol, onBack }: StockDetailProps) {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -98,11 +144,8 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
   }, [symbol]);
 
   useEffect(() => {
-    fetch(`/api/news/${encodeURIComponent(symbol)}`)
-      .catch(() => {});
-    // Use search-based news for individual ticker
-    import('yahoo-finance2').catch(() => {});
-    fetch(`/api/news/nasdaq`) // fallback — reuse market news
+    // Fetch news using the ticker as a search query via the backend
+    fetch(`/api/ticker-news/${encodeURIComponent(symbol)}`)
       .then(r => r.json())
       .then(setNews)
       .catch(() => {});
@@ -169,6 +212,46 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
 
       <StockChart symbol={symbol} />
 
+      {detail.description && (
+        <div className="detail-about">
+          <h3>About {detail.symbol}</h3>
+          <ExpandableText text={detail.description} />
+          <div className="detail-company-info">
+            {detail.ceo && (
+              <div className="company-info-item">
+                <span className="company-info-label">CEO</span>
+                <span className="company-info-value">{detail.ceo}</span>
+              </div>
+            )}
+            {detail.employees && (
+              <div className="company-info-item">
+                <span className="company-info-label">Employees</span>
+                <span className="company-info-value">{detail.employees.toLocaleString()}</span>
+              </div>
+            )}
+            {(detail.city || detail.state) && (
+              <div className="company-info-item">
+                <span className="company-info-label">Headquarters</span>
+                <span className="company-info-value">{[detail.city, detail.state].filter(Boolean).join(', ')}</span>
+              </div>
+            )}
+            {detail.sector && (
+              <div className="company-info-item">
+                <span className="company-info-label">Sector</span>
+                <span className="company-info-value">{detail.sector}</span>
+              </div>
+            )}
+            {detail.industry && (
+              <div className="company-info-item">
+                <span className="company-info-label">Industry</span>
+                <span className="company-info-value">{detail.industry}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <h3 className="detail-section-title">Key Statistics</h3>
       <table className="detail-stats-table">
         <tbody>
           {statsRows.map((row, ri) => (
@@ -184,12 +267,8 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
         </tbody>
       </table>
 
-      {detail.description && (
-        <div className="detail-about">
-          <h3>About</h3>
-          <p>{detail.description}</p>
-        </div>
-      )}
+      {news.length > 0 && <NewsSection news={news} symbol={detail.symbol} />}
+
     </div>
   );
 }
