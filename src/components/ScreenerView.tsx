@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { Quote } from '../types';
-import { ScreenerFilters, EMPTY_FILTERS } from './ScreenerFilters';
-import ScreenerFiltersBar from './ScreenerFilters';
+import type { ScreenerFilters } from './ScreenerFilters';
+import ScreenerFiltersBar, { EMPTY_FILTERS } from './ScreenerFilters';
 import { getLogoUrl } from '../tickerDomains';
 import { SortAscending, SortDescending } from '@phosphor-icons/react';
 import { FlashCell } from './FlashCell';
