@@ -7,12 +7,6 @@
   gap: 16px;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
 .header-logo {
   font-family: 'Tanker', sans-serif;
   font-weight: 400;
@@ -21,95 +15,6 @@
   white-space: nowrap;
 }
 
-/* Search */
-.search-wrap {
-  position: relative;
-}
-
-.search-input {
-  font-family: inherit;
-  font-size: 13px;
-  padding: 7px 12px;
-  width: 200px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-secondary);
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s, width 0.2s;
-}
-
-.search-input:focus {
-  border-color: var(--accent);
-  width: 280px;
-}
-
-.search-input::placeholder {
-  color: var(--text-secondary);
-}
-
-.search-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 4px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  z-index: 100;
-  animation: fadeIn 0.15s ease;
-  min-width: 280px;
-}
-
-.search-result {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 12px;
-  font-family: inherit;
-  font-size: 13px;
-  border: none;
-  background: none;
-  color: var(--text);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.1s;
-}
-
-.search-result:hover {
-  background: var(--pill-active-bg);
-}
-
-.search-logo {
-  width: 16px;
-  height: 16px;
-  border-radius: 3px;
-  object-fit: contain;
-}
-
-.search-symbol {
-  font-weight: 600;
-  min-width: 50px;
-}
-
-.search-price {
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-  margin-left: auto;
-}
-
-.search-change {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  min-width: 60px;
-  text-align: right;
-}
-
-.search-change.up { color: var(--positive); }
-.search-change.down { color: var(--negative); }
 
 /* Market status */
 .market-status {
@@ -212,16 +117,13 @@
 
 @media (max-width: 768px) {
   .header {
+    grid-template-columns: auto 1fr auto;
     padding: 12px 20px;
-    flex-wrap: wrap;
+    gap: 10px;
   }
 
-  .search-input {
-    width: 150px;
-  }
-
-  .search-input:focus {
-    width: 200px;
+  .search-wrap {
+    max-width: 100%;
   }
 
   .market-status {

@@ -1,4 +1,6 @@
-import type { Market, View } from '../types';
+import { useState, useRef } from 'react';
+import type { Market, View, Quote } from '../types';
+import { getLogoUrl } from '../tickerDomains';
 import './Toolbar.css';
 
 interface ToolbarProps {
@@ -6,6 +8,8 @@ interface ToolbarProps {
   onMarketChange: (market: Market) => void;
   view: View;
   onViewChange: (view: View) => void;
+  quotes: Quote[];
+  onSelectStock: (symbol: string) => void;
 }
 
 const MARKETS: { value: Market; label: string }[] = [
@@ -21,7 +25,24 @@ const VIEWS: { value: View; label: string }[] = [
   { value: 'heatmap', label: 'Heatmap' },
 ];
 
-export function Toolbar({ market, onMarketChange, view, onViewChange }: ToolbarProps) {
+export function Toolbar({ market, onMarketChange, view, onViewChange, quotes, onSelectStock }: ToolbarProps) {
+  const [search, setSearch] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const results = search.length > 0
+    ? quotes.filter(q => q.symbol.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
+    : [];
+
+  const handleSelect = (symbol: string) => {
+    onSelectStock(symbol);
+    setSearch('');
+    setShowResults(false);
+    setExpanded(false);
+    inputRef.current?.blur();
+  };
+
   return (
     <div className="toolbar">
       <div className="pill-group">
@@ -35,6 +56,45 @@ export function Toolbar({ market, onMarketChange, view, onViewChange }: ToolbarP
           </button>
         ))}
       </div>
+
+      <div className={`toolbar-search-wrap ${expanded ? 'expanded' : ''}`}>
+        {!expanded && (
+          <button className="search-icon-btn" onClick={() => { setExpanded(true); setTimeout(() => inputRef.current?.focus(), 50); }} aria-label="Search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </button>
+        )}
+        {expanded && (
+          <input
+            ref={inputRef}
+            className="toolbar-search"
+            type="text"
+            placeholder="Search ticker..."
+            value={search}
+            onChange={e => { setSearch(e.target.value); setShowResults(true); }}
+            onFocus={() => setShowResults(true)}
+            onBlur={() => { setTimeout(() => { setShowResults(false); if (!search) setExpanded(false); }, 150); }}
+          />
+        )}
+        {showResults && results.length > 0 && (
+          <div className="toolbar-search-dropdown">
+            {results.map(q => (
+              <button key={q.symbol} className="toolbar-search-result" onMouseDown={() => handleSelect(q.symbol)}>
+                {getLogoUrl(q.symbol) && (
+                  <img className="toolbar-search-logo" src={getLogoUrl(q.symbol)!} alt="" />
+                )}
+                <span className="toolbar-search-symbol">{q.symbol}</span>
+                <span className="toolbar-search-price">${q.price?.toFixed(2)}</span>
+                <span className={`toolbar-search-change ${q.changePercent > 0 ? 'up' : q.changePercent < 0 ? 'down' : ''}`}>
+                  {q.changePercent > 0 ? '+' : ''}{q.changePercent?.toFixed(2)}%
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="pill-group">
         {VIEWS.map(v => (
           <button

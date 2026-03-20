@@ -74,8 +74,6 @@ function App() {
     onThemeToggle: toggleTheme,
     pollingSpeed,
     onPollingSpeedChange: setPollingSpeed,
-    quotes,
-    onSelectStock: setSelectedStock,
     marketStatus,
   };
 
@@ -96,6 +94,8 @@ function App() {
         onMarketChange={setMarket}
         view={view}
         onViewChange={setView}
+        quotes={quotes}
+        onSelectStock={setSelectedStock}
       />
 
       <main className={`content${switching ? ' switching' : ''}`}>

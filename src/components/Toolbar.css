@@ -33,6 +33,115 @@
   color: var(--pill-active-text);
 }
 
+/* Search */
+.toolbar-search-wrap {
+  position: relative;
+  margin-left: auto;
+}
+
+.search-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.search-icon-btn:hover {
+  color: var(--text);
+  background: var(--pill-active-bg);
+}
+
+.toolbar-search {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 14px;
+  width: 220px;
+  border-radius: 980px;
+  border: 1px solid var(--accent);
+  background: var(--bg-secondary);
+  color: var(--text);
+  outline: none;
+  animation: searchExpand 0.2s ease;
+}
+
+@keyframes searchExpand {
+  from { width: 32px; opacity: 0; }
+  to { width: 220px; opacity: 1; }
+}
+
+.toolbar-search::placeholder {
+  color: var(--text-secondary);
+}
+
+.toolbar-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  min-width: 280px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 100;
+  animation: fadeIn 0.15s ease;
+}
+
+.toolbar-search-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.toolbar-search-result:hover {
+  background: var(--pill-active-bg);
+}
+
+.toolbar-search-logo {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  object-fit: contain;
+}
+
+.toolbar-search-symbol {
+  font-weight: 600;
+  min-width: 50px;
+}
+
+.toolbar-search-price {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+
+.toolbar-search-change {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 60px;
+  text-align: right;
+}
+
+.toolbar-search-change.up { color: var(--positive); }
+.toolbar-search-change.down { color: var(--negative); }
+
 @media (max-width: 768px) {
   .toolbar {
     flex-direction: column;
