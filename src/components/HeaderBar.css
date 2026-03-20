@@ -14,7 +14,7 @@
 .header-bar-logo {
   font-family: 'Tanker', sans-serif;
   font-size: 20px;
-  color: var(--accent);
+  color: var(--text);
   letter-spacing: 2px;
   white-space: nowrap;
   cursor: pointer;
