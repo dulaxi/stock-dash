@@ -99,12 +99,14 @@ export default function HeaderBar({
             </button>
           ))}
         </div>
-        <button className="hb-theme-toggle" onClick={onThemeToggle} aria-label="Toggle theme">
-          {theme === 'dark' ? '\u2600' : '\u263E'}
-        </button>
-        <div className="hb-market-status">
-          <span className={`status-dot ${marketStatus}`} />
-          {statusLabel}
+        <div className="pill-group">
+          <button className="pill icon-pill" onClick={onThemeToggle} aria-label="Toggle theme">
+            {theme === 'dark' ? '\u2600' : '\u263E'}
+          </button>
+          <div className="pill status-pill">
+            <span className={`status-dot ${marketStatus}`} />
+            {statusLabel}
+          </div>
         </div>
       </div>
     </div>

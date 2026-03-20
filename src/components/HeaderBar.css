@@ -171,48 +171,43 @@
   color: #fff;
 }
 
-.header-bar .hb-market-status {
-  font-size: 11px;
-  color: var(--text-secondary);
+.header-bar .pill.icon-pill {
+  font-size: 14px;
+  padding: 4px 8px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  line-height: 1;
+}
+
+.header-bar .pill.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: default;
+  font-size: 11px;
+  padding: 4px 10px;
   white-space: nowrap;
 }
 
-.header-bar .hb-market-status .status-dot {
+.header-bar .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
-.header-bar .hb-market-status .status-dot.open {
+.header-bar .status-dot.open {
   background: var(--positive);
 }
 
-.header-bar .hb-market-status .status-dot.pre {
+.header-bar .status-dot.pre {
   background: #ff9f0a;
 }
 
-.header-bar .hb-market-status .status-dot.closed {
+.header-bar .status-dot.closed {
   background: var(--text-secondary);
-}
-
-.header-bar .hb-theme-toggle {
-  background: none;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-}
-
-.header-bar .hb-theme-toggle:hover {
-  background: var(--pill-bg);
 }
 
 @media (max-width: 768px) {
