@@ -18,6 +18,22 @@
   opacity: 0.85;
 }
 
+.heatmap-tooltip {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.heatmap-tooltip-symbol {
+  font-weight: 700;
+  font-size: 14px;
+}
+
 @media (max-width: 768px) {
   .heatmap-view {
     padding: 12px;

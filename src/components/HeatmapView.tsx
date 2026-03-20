@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Quote } from '../types';
 import { getLogoUrl } from '../tickerDomains';
 import './HeatmapView.css';
@@ -106,6 +106,9 @@ function getColor(pct: number): string {
 }
 
 export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
+  const [hover, setHover] = useState<TreeNode | null>(null);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+
   const nodes = useMemo(() => {
     const sorted = quotes
       .filter(q => q.marketCap && q.marketCap > 0)
@@ -121,13 +124,17 @@ export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
 
   return (
     <div className="heatmap-view">
-      <svg viewBox="0 0 1000 600" className="heatmap-svg" preserveAspectRatio="none">
+      <svg viewBox="0 0 1000 600" className="heatmap-svg" preserveAspectRatio="none"
+        onMouseLeave={() => setHover(null)}>
         {nodes.map(n => {
           const color = getColor(n.changePercent);
           const isSmall = n.w < 60 || n.h < 40;
           const isTiny = n.w < 35 || n.h < 25;
           return (
-            <g key={n.symbol} onClick={() => onSelectStock(n.symbol)} className="heatmap-cell" style={{ cursor: 'pointer' }}>
+            <g key={n.symbol} onClick={() => onSelectStock(n.symbol)} className="heatmap-cell" style={{ cursor: 'pointer' }}
+              onMouseEnter={(e) => { setHover(n); setMouse({ x: e.clientX, y: e.clientY }); }}
+              onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
+              onMouseLeave={() => setHover(null)}>
               <rect
                 x={n.x + 1}
                 y={n.y + 1}
@@ -168,6 +175,15 @@ export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
           );
         })}
       </svg>
+      {hover && (
+        <div className="heatmap-tooltip" style={{ left: mouse.x + 12, top: mouse.y - 40, position: 'fixed' }}>
+          <div className="heatmap-tooltip-symbol">{hover.symbol}</div>
+          <div>${hover.price?.toFixed(2)}</div>
+          <div style={{ color: hover.changePercent >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
+            {hover.changePercent >= 0 ? '+' : ''}{hover.changePercent.toFixed(2)}%
+          </div>
+        </div>
+      )}
     </div>
   );
 }
