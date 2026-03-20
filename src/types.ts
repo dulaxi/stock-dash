@@ -34,5 +34,5 @@ export interface SectorPerformance {
 }
 
 export type Market = 'nasdaq' | 'sp500' | 'dow' | 'all';
-export type View = 'dashboard' | 'heatmap' | 'movers' | 'grid' | 'watchlist' | 'news';
+export type View = 'dashboard' | 'heatmap' | 'movers' | 'screener' | 'watchlist' | 'news';
 export type PollingSpeed = 5000 | 10000 | 30000;

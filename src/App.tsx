@@ -6,7 +6,7 @@ import Dashboard from './components/Dashboard';
 import { StockDetail } from './components/StockDetail';
 import { HeatmapView } from './components/HeatmapView';
 import { TopMoversView } from './components/TopMoversView';
-import { GridView } from './components/GridView';
+import ScreenerView from './components/ScreenerView';
 import WatchlistView from './components/WatchlistView';
 import NewsView from './components/NewsView';
 import type { Market, View } from './types';
@@ -37,7 +37,9 @@ function Skeleton() {
 function App() {
   const [theme, setTheme] = useLocalStorage('xtox-theme', 'dark');
   const [market, setMarket] = useLocalStorage<Market>('xtox-market', 'all');
-  const [view, setView] = useLocalStorage<View>('xtox-view', 'dashboard');
+  const [storedView, setView] = useLocalStorage<View>('xtox-view', 'dashboard');
+  const VALID_VIEWS: View[] = ['dashboard', 'heatmap', 'movers', 'screener', 'watchlist', 'news'];
+  const view = VALID_VIEWS.includes(storedView) ? storedView : 'dashboard';
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
 
   const { quotes, indices, loading, error } = usePolling(market, 10000);
@@ -109,9 +111,9 @@ function App() {
               onNavigate={handleNavigate}
             />
           )}
-          {view === 'heatmap' && <HeatmapView quotes={quotes} onSelectStock={setSelectedStock} />}
+          {view === 'heatmap' && <HeatmapView quotes={quotes} onSelectStock={setSelectedStock} onNavigate={handleNavigate} />}
           {view === 'movers' && <TopMoversView quotes={quotes} onSelectStock={setSelectedStock} />}
-          {view === 'grid' && <GridView quotes={quotes} onSelectStock={setSelectedStock} />}
+          {view === 'screener' && <ScreenerView quotes={quotes} onSelectStock={setSelectedStock} onNavigate={handleNavigate} />}
           {view === 'watchlist' && <WatchlistView quotes={quotes} onSelectStock={setSelectedStock} />}
           {view === 'news' && <NewsView market={market} />}
         </>

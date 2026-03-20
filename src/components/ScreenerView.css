@@ -1,0 +1,163 @@
+/* ── Layout ── */
+.screener-view {
+  padding: 12px 24px 0;
+  height: calc(100vh - 46px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Controls (view toggle + presets) ── */
+.screener-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.screener-controls .pill-group {
+  display: flex;
+  gap: 2px;
+  background: var(--pill-bg);
+  border-radius: 980px;
+  padding: 3px;
+}
+
+.screener-controls .pill {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 980px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.screener-controls .pill:hover {
+  color: var(--text);
+}
+
+.screener-controls .pill.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
+}
+
+/* ── Result count ── */
+.screener-result-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0 6px;
+}
+
+/* ── Table wrapper (scrollable area) ── */
+.screener-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ── Table ── */
+.screener-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.screener-table thead {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 2;
+}
+
+.screener-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.screener-table th:hover {
+  color: var(--text);
+}
+
+.screener-table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.screener-table .num,
+.screener-table th.num {
+  text-align: right;
+}
+
+/* ── Row interactions ── */
+.screener-table .clickable-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.screener-table .clickable-row:hover {
+  background: rgba(128, 128, 128, 0.06);
+}
+
+/* ── Symbol cell with logo ── */
+.screener-table .symbol {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.screener-table .ticker-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+/* ── Color classes ── */
+.screener-table .up {
+  color: var(--positive);
+}
+
+.screener-table .down {
+  color: var(--negative);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .screener-view {
+    padding: 12px 12px 0;
+  }
+
+  .screener-controls {
+    flex-wrap: wrap;
+  }
+
+  .screener-table-wrap {
+    overflow-x: auto;
+  }
+
+  .screener-table {
+    min-width: 800px;
+  }
+
+  .screener-table .col-52w {
+    display: none;
+  }
+
+  .screener-table th.col-52w {
+    display: none;
+  }
+}

@@ -5,6 +5,7 @@ import './HeatmapView.css';
 interface HeatmapViewProps {
   quotes: Quote[];
   onSelectStock: (symbol: string) => void;
+  onNavigate?: (view: string) => void;
 }
 
 interface TreeNode {
@@ -113,7 +114,7 @@ function getColor(pct: number): string {
 
 type GroupMode = 'marketcap' | 'sector';
 
-export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
+export function HeatmapView({ quotes, onSelectStock, onNavigate }: HeatmapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ w: 800, h: 500 });
   const [hover, setHover] = useState<TreeNode | null>(null);
@@ -194,6 +195,12 @@ export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
   return (
     <div className="heatmap-view">
       <div className="heatmap-controls">
+        {onNavigate && (
+          <div className="pill-group">
+            <button className="pill active">Heatmap</button>
+            <button className="pill" onClick={() => onNavigate('screener')}>Screener</button>
+          </div>
+        )}
         <div className="pill-group">
           <button className={`pill ${groupMode === 'marketcap' ? 'active' : ''}`}
             onClick={() => setGroupMode('marketcap')}>By Market Cap</button>
