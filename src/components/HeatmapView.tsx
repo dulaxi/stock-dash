@@ -121,7 +121,7 @@ export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
 
   return (
     <div className="heatmap-view">
-      <svg viewBox="0 0 1000 600" className="heatmap-svg">
+      <svg viewBox="0 0 1000 600" className="heatmap-svg" preserveAspectRatio="none">
         {nodes.map(n => {
           const color = getColor(n.changePercent);
           const isSmall = n.w < 60 || n.h < 40;

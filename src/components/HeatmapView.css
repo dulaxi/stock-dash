@@ -1,10 +1,13 @@
 .heatmap-view {
-  padding: 0 32px 32px;
+  padding: 16px 24px 24px;
+  height: calc(100vh - 46px);
+  display: flex;
+  flex-direction: column;
 }
 
 .heatmap-svg {
   width: 100%;
-  height: auto;
+  flex: 1;
 }
 
 .heatmap-cell rect {
@@ -17,11 +20,6 @@
 
 @media (max-width: 768px) {
   .heatmap-view {
-    padding: 0 12px 20px;
-    overflow-x: auto;
-  }
-
-  .heatmap-svg {
-    min-width: 700px;
+    padding: 12px;
   }
 }
