@@ -26,5 +26,5 @@ export interface NewsItem {
 }
 
 export type Market = 'nasdaq' | 'sp500' | 'dow';
-export type View = 'summary' | 'movers' | 'grid';
+export type View = 'summary' | 'movers' | 'grid' | 'heatmap';
 export type PollingSpeed = 5000 | 10000 | 30000;

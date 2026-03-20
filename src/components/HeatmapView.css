@@ -1,0 +1,27 @@
+.heatmap-view {
+  padding: 0 32px 32px;
+}
+
+.heatmap-svg {
+  width: 100%;
+  height: auto;
+}
+
+.heatmap-cell rect {
+  transition: opacity 0.15s;
+}
+
+.heatmap-cell:hover rect {
+  opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+  .heatmap-view {
+    padding: 0 12px 20px;
+    overflow-x: auto;
+  }
+
+  .heatmap-svg {
+    min-width: 700px;
+  }
+}

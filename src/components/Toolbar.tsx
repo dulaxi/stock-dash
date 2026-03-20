@@ -18,6 +18,7 @@ const VIEWS: { value: View; label: string }[] = [
   { value: 'summary', label: 'Summary' },
   { value: 'movers', label: 'Top Movers' },
   { value: 'grid', label: 'Grid' },
+  { value: 'heatmap', label: 'Heatmap' },
 ];
 
 export function Toolbar({ market, onMarketChange, view, onViewChange }: ToolbarProps) {

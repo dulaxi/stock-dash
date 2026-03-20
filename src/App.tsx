@@ -6,6 +6,7 @@ import { Toolbar } from './components/Toolbar';
 import { SummaryView } from './components/SummaryView';
 import { TopMoversView } from './components/TopMoversView';
 import { GridView } from './components/GridView';
+import { HeatmapView } from './components/HeatmapView';
 import { StockDetail } from './components/StockDetail';
 import type { Market, View, PollingSpeed } from './types';
 import './App.css';
@@ -52,15 +53,36 @@ function App() {
     document.documentElement.dataset.theme = next;
   };
 
+  // Market status based on US Eastern Time
+  const getMarketStatus = (): string => {
+    const now = new Date();
+    const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const h = et.getHours();
+    const m = et.getMinutes();
+    const day = et.getDay();
+    if (day === 0 || day === 6) return 'closed';
+    const mins = h * 60 + m;
+    if (mins >= 570 && mins < 960) return 'open'; // 9:30 AM - 4:00 PM
+    if (mins >= 240 && mins < 570) return 'pre'; // 4:00 AM - 9:30 AM
+    return 'closed';
+  };
+
+  const marketStatus = getMarketStatus();
+
+  const headerProps = {
+    theme,
+    onThemeToggle: toggleTheme,
+    pollingSpeed,
+    onPollingSpeedChange: setPollingSpeed,
+    quotes,
+    onSelectStock: setSelectedStock,
+    marketStatus,
+  };
+
   if (selectedStock) {
     return (
       <div className="app">
-        <Header
-          theme={theme}
-          onThemeToggle={toggleTheme}
-          pollingSpeed={pollingSpeed}
-          onPollingSpeedChange={setPollingSpeed}
-        />
+        <Header {...headerProps} />
         <StockDetail symbol={selectedStock} onBack={() => setSelectedStock(null)} />
       </div>
     );
@@ -68,12 +90,7 @@ function App() {
 
   return (
     <div className="app">
-      <Header
-        theme={theme}
-        onThemeToggle={toggleTheme}
-        pollingSpeed={pollingSpeed}
-        onPollingSpeedChange={setPollingSpeed}
-      />
+      <Header {...headerProps} />
       <Toolbar
         market={market}
         onMarketChange={setMarket}
@@ -92,6 +109,7 @@ function App() {
             {view === 'summary' && <SummaryView quotes={quotes} indices={indices} market={market} onSelectStock={setSelectedStock} />}
             {view === 'movers' && <TopMoversView quotes={quotes} onSelectStock={setSelectedStock} />}
             {view === 'grid' && <GridView quotes={quotes} onSelectStock={setSelectedStock} />}
+            {view === 'heatmap' && <HeatmapView quotes={quotes} onSelectStock={setSelectedStock} />}
           </div>
         )}
       </main>
