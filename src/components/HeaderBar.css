@@ -147,24 +147,27 @@
 
 .header-bar .pill-group {
   display: flex;
-  gap: 6px;
+  gap: 2px;
+  background: var(--pill-bg);
+  border-radius: 980px;
+  padding: 3px;
 }
 
 .header-bar .pill {
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 980px;
   border: none;
-  background: var(--pill-bg);
+  background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
 .header-bar .pill:hover {
-  background: var(--pill-active-bg);
+  color: var(--text);
 }
 
 .header-bar .pill.active {
