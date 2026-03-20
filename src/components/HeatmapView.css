@@ -42,9 +42,14 @@
   color: var(--pill-active-text);
 }
 
-.heatmap-svg {
-  width: 100%;
+.heatmap-container {
   flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.heatmap-container svg {
+  display: block;
 }
 
 .heatmap-cell rect {
@@ -71,9 +76,20 @@
   font-size: 14px;
 }
 
-.heatmap-tooltip-sector {
+.heatmap-tooltip-name {
   font-size: 11px;
   color: var(--text-secondary);
+}
+
+.heatmap-tooltip-sector {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.heatmap-tooltip-price {
+  font-size: 13px;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {

@@ -150,7 +150,42 @@
 .heatmap-tooltip-name {
   color: var(--text-secondary);
   font-size: 11px;
+}
+
+.heatmap-tooltip-sector {
+  font-size: 10px;
+  color: var(--text-secondary);
   margin-bottom: 4px;
+}
+
+.heatmap-mini-toggle {
+  display: flex;
+  gap: 1px;
+  background: var(--pill-bg);
+  border-radius: 980px;
+  padding: 2px;
+}
+
+.heatmap-mini-toggle button {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 980px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.heatmap-mini-toggle button:hover {
+  color: var(--text);
+}
+
+.heatmap-mini-toggle button.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
 }
 
 /* ── Sidebar ─────────────────────────────────────── */

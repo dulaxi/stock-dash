@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import type { Quote } from '../types';
 import './HeatmapView.css';
 
@@ -9,6 +9,7 @@ interface HeatmapViewProps {
 
 interface TreeNode {
   symbol: string;
+  shortName?: string;
   price: number;
   changePercent: number;
   marketCap: number;
@@ -27,7 +28,7 @@ interface SectorLabel {
   h: number;
 }
 
-function squarify(items: { symbol: string; price: number; changePercent: number; sector?: string; value: number }[], x: number, y: number, w: number, h: number): TreeNode[] {
+function squarify(items: { symbol: string; shortName?: string; price: number; changePercent: number; sector?: string; value: number }[], x: number, y: number, w: number, h: number): TreeNode[] {
   if (items.length === 0) return [];
   if (items.length === 1) {
     return [{ ...items[0], marketCap: items[0].value, x, y, w, h }];
@@ -113,9 +114,22 @@ function getColor(pct: number): string {
 type GroupMode = 'marketcap' | 'sector';
 
 export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dims, setDims] = useState({ w: 800, h: 500 });
   const [hover, setHover] = useState<TreeNode | null>(null);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [groupMode, setGroupMode] = useState<GroupMode>('marketcap');
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      if (width > 0 && height > 0) setDims({ w: width, h: height });
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const { nodes, sectorLabels } = useMemo(() => {
     const valid = quotes
@@ -124,10 +138,10 @@ export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
 
     if (groupMode === 'marketcap') {
       const items = valid.map(q => ({
-        symbol: q.symbol, price: q.price, changePercent: q.changePercent,
-        sector: q.sector, value: q.marketCap || 0,
+        symbol: q.symbol, shortName: q.shortName, price: q.price,
+        changePercent: q.changePercent, sector: q.sector, value: q.marketCap || 0,
       }));
-      return { nodes: squarify(items, 0, 0, 1000, 600), sectorLabels: [] as SectorLabel[] };
+      return { nodes: squarify(items, 0, 0, dims.w, dims.h), sectorLabels: [] as SectorLabel[] };
     }
 
     // Group by sector
@@ -138,23 +152,18 @@ export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
       sectorMap.get(sector)!.push(q);
     }
 
-    // Sort sectors by total market cap
     const sectors = [...sectorMap.entries()]
       .map(([sector, stocks]) => ({
-        sector,
-        stocks,
+        sector, stocks,
         totalCap: stocks.reduce((s, q) => s + (q.marketCap || 0), 0),
       }))
       .sort((a, b) => b.totalCap - a.totalCap);
 
-    // First pass: layout sector blocks
-    const totalCap = sectors.reduce((s, sec) => s + sec.totalCap, 0);
     const sectorItems = sectors.map(s => ({
       symbol: s.sector, price: 0, changePercent: 0, value: s.totalCap,
     }));
-    const sectorBlocks = squarify(sectorItems, 0, 0, 1000, 600);
+    const sectorBlocks = squarify(sectorItems, 0, 0, dims.w, dims.h);
 
-    // Second pass: layout stocks within each sector block
     const allNodes: TreeNode[] = [];
     const labels: SectorLabel[] = [];
 
@@ -165,23 +174,22 @@ export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
 
       labels.push({ sector, x: block.x, y: block.y, w: block.w, h: block.h });
 
-      // Reserve space for sector label (14px at top)
-      const labelHeight = block.h > 40 ? 14 : 0;
+      const labelHeight = block.h > 50 ? 16 : 0;
       const innerY = block.y + labelHeight;
       const innerH = block.h - labelHeight;
-
       if (innerH <= 0) continue;
 
       const stockItems = stocks.map(q => ({
-        symbol: q.symbol, price: q.price, changePercent: q.changePercent,
-        sector: q.sector, value: q.marketCap || 0,
+        symbol: q.symbol, shortName: q.shortName, price: q.price,
+        changePercent: q.changePercent, sector: q.sector, value: q.marketCap || 0,
       }));
-      const stockNodes = squarify(stockItems, block.x, innerY, block.w, innerH);
-      allNodes.push(...stockNodes);
+      allNodes.push(...squarify(stockItems, block.x, innerY, block.w, innerH));
     }
 
     return { nodes: allNodes, sectorLabels: labels };
-  }, [quotes, groupMode]);
+  }, [quotes, groupMode, dims]);
+
+  const gap = 2;
 
   return (
     <div className="heatmap-view">
@@ -193,62 +201,73 @@ export function HeatmapView({ quotes, onSelectStock }: HeatmapViewProps) {
             onClick={() => setGroupMode('sector')}>By Sector</button>
         </div>
       </div>
-      <svg viewBox="0 0 1000 600" className="heatmap-svg" preserveAspectRatio="none"
+      <div className="heatmap-container" ref={containerRef}
         onMouseLeave={() => setHover(null)}>
-        {/* Sector borders and labels */}
-        {sectorLabels.map(s => (
-          <g key={s.sector}>
-            <rect x={s.x} y={s.y} width={s.w} height={s.h}
-              fill="none" stroke="var(--bg)" strokeWidth={2} />
-            {s.h > 40 && s.w > 50 && (
-              <text x={s.x + 4} y={s.y + 11}
-                fill="rgba(255,255,255,0.7)" fontSize={9} fontWeight={600}>
-                {s.sector}
-              </text>
-            )}
-          </g>
-        ))}
-        {/* Stock cells */}
-        {nodes.map(n => {
-          const color = getColor(n.changePercent);
-          const isSmall = n.w < 60 || n.h < 40;
-          const isTiny = n.w < 35 || n.h < 25;
-          return (
-            <g key={n.symbol} onClick={() => onSelectStock(n.symbol)} className="heatmap-cell" style={{ cursor: 'pointer' }}
-              onMouseEnter={(e) => { setHover(n); setMouse({ x: e.clientX, y: e.clientY }); }}
-              onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
-              onMouseLeave={() => setHover(null)}>
-              <rect
-                x={n.x + 1} y={n.y + 1}
-                width={Math.max(0, n.w - 2)} height={Math.max(0, n.h - 2)}
-                rx={3} fill={color}
-              />
-              {!isTiny && (
-                <>
-                  <text x={n.x + n.w / 2} y={n.y + n.h / 2 - (isSmall ? 0 : 6)}
-                    textAnchor="middle" dominantBaseline="central"
-                    fill="#fff" fontSize={isSmall ? 9 : 13} fontWeight={700}>
-                    {n.symbol}
-                  </text>
-                  {!isSmall && (
-                    <text x={n.x + n.w / 2} y={n.y + n.h / 2 + 12}
-                      textAnchor="middle" dominantBaseline="central"
-                      fill="rgba(255,255,255,0.8)" fontSize={11} fontWeight={500}>
-                      {n.changePercent > 0 ? '+' : ''}{n.changePercent?.toFixed(2)}%
-                    </text>
-                  )}
-                </>
+        <svg width={dims.w} height={dims.h} viewBox={`0 0 ${dims.w} ${dims.h}`}>
+          {/* Sector borders and labels */}
+          {sectorLabels.map(s => (
+            <g key={s.sector}>
+              <rect x={s.x + 1} y={s.y + 1} width={Math.max(0, s.w - 2)} height={Math.max(0, s.h - 2)}
+                fill="none" stroke="var(--border)" strokeWidth={2} rx={4} />
+              {s.h > 50 && s.w > 60 && (
+                <text x={s.x + 6} y={s.y + 12}
+                  fill="var(--text-secondary)" fontSize={10} fontWeight={700}
+                  style={{ textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>
+                  {s.sector}
+                </text>
               )}
             </g>
-          );
-        })}
-      </svg>
+          ))}
+          {/* Stock cells */}
+          {nodes.map(n => {
+            const color = getColor(n.changePercent);
+            const cw = Math.max(0, n.w - gap * 2);
+            const ch = Math.max(0, n.h - gap * 2);
+            const showSymbol = cw > 30 && ch > 20;
+            const showPercent = cw > 55 && ch > 35;
+            const showName = cw > 90 && ch > 50;
+            const fontSize = cw > 120 && ch > 60 ? 14 : cw > 70 ? 12 : 10;
+            return (
+              <g key={n.symbol} onClick={() => onSelectStock(n.symbol)}
+                className="heatmap-cell" style={{ cursor: 'pointer' }}
+                onMouseEnter={(e) => { setHover(n); setMouse({ x: e.clientX, y: e.clientY }); }}
+                onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
+                onMouseLeave={() => setHover(null)}>
+                <rect x={n.x + gap} y={n.y + gap} width={cw} height={ch}
+                  rx={3} fill={color} stroke="rgba(0,0,0,0.15)" strokeWidth={0.5} />
+                {showSymbol && (
+                  <text x={n.x + n.w / 2} y={n.y + n.h / 2 - (showPercent ? (showName ? 10 : 6) : 0)}
+                    textAnchor="middle" dominantBaseline="central"
+                    fill="#fff" fontSize={fontSize} fontWeight={700}>
+                    {n.symbol}
+                  </text>
+                )}
+                {showPercent && (
+                  <text x={n.x + n.w / 2} y={n.y + n.h / 2 + (showName ? 4 : 8)}
+                    textAnchor="middle" dominantBaseline="central"
+                    fill="rgba(255,255,255,0.85)" fontSize={fontSize - 2} fontWeight={500}>
+                    {n.changePercent > 0 ? '+' : ''}{n.changePercent?.toFixed(2)}%
+                  </text>
+                )}
+                {showName && n.shortName && (
+                  <text x={n.x + n.w / 2} y={n.y + n.h / 2 + 18}
+                    textAnchor="middle" dominantBaseline="central"
+                    fill="rgba(255,255,255,0.5)" fontSize={9} fontWeight={400}>
+                    {n.shortName.length > 18 ? n.shortName.slice(0, 18) + '…' : n.shortName}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
       {hover && (
-        <div className="heatmap-tooltip" style={{ left: mouse.x + 12, top: mouse.y - 40, position: 'fixed' }}>
+        <div className="heatmap-tooltip" style={{ left: mouse.x + 12, top: mouse.y - 50, position: 'fixed' }}>
           <div className="heatmap-tooltip-symbol">{hover.symbol}</div>
+          {hover.shortName && <div className="heatmap-tooltip-name">{hover.shortName}</div>}
           {hover.sector && <div className="heatmap-tooltip-sector">{hover.sector}</div>}
-          <div>${hover.price?.toFixed(2)}</div>
-          <div style={{ color: hover.changePercent >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
+          <div className="heatmap-tooltip-price">${hover.price?.toFixed(2)}</div>
+          <div style={{ color: hover.changePercent >= 0 ? 'var(--positive)' : 'var(--negative)', fontWeight: 600 }}>
             {hover.changePercent >= 0 ? '+' : ''}{hover.changePercent.toFixed(2)}%
           </div>
         </div>
