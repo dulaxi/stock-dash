@@ -12,20 +12,18 @@ Replace the inaccessible Grid view with a Stock Screener — a filterable, sorta
 
 ### Navigation
 
-The screener replaces the `'grid'` view in the navigation model:
+The screener lives inside the HeatmapView as a toggle, sharing the same full-page slot:
 
 ```typescript
 export type View = 'dashboard' | 'heatmap' | 'movers' | 'screener' | 'watchlist' | 'news';
 ```
 
-- Dashboard heatmap "See all →" navigates to `'screener'` (was `'heatmap'` — heatmap "See all" now goes to full heatmap, screener gets its own "See all" or is accessible via a tab/toggle on the heatmap full view)
-- Actually: keep heatmap "See all" going to `'heatmap'`. Add a separate path to screener. The dashboard gets a small "Screener" link or the screener is accessible from the heatmap full view as a toggle (Heatmap | Table).
+**Navigation paths to screener:**
+- Dashboard heatmap "See all →" → full HeatmapView (unchanged). User toggles to Screener from there.
+- Direct: App.tsx renders ScreenerView when `view === 'screener'`. HeatmapView renders when `view === 'heatmap'`. Both views have a shared `( Heatmap | Screener )` toggle at the top that switches between them by calling `onNavigate('heatmap')` or `onNavigate('screener')`.
+- The `'grid'` value is removed from the View type entirely.
 
-**Revised navigation:**
-- Dashboard heatmap "See all →" → full HeatmapView (unchanged)
-- HeatmapView gains a toggle: `( Heatmap | Screener )` — switches between heatmap and screener in the same full-page view
-- Both share the same data (quotes from current market)
-- The `'grid'` View type is renamed to `'screener'`
+**localStorage migration:** If a returning user has `'grid'` stored in localStorage for `xtox-view`, App.tsx should treat any unrecognized view value as `'dashboard'` (the default). This is handled by adding a validation check after reading from localStorage.
 
 ### Data Flow
 
@@ -50,11 +48,13 @@ interface ScreenerFilters {
   changePercentMin: number | null;
   changePercentMax: number | null;
   volumeMin: number | null;
-  fiftyTwoWeekProximity: 'high' | 'low' | null; // within 10% of 52W high or low
+  near52wLow: boolean;         // true = price within 10% of 52W low
 }
 
 type PresetName = 'all' | 'value' | 'momentum' | 'megacap' | 'smallcap' | 'near52wlow';
 ```
+
+**Handling undefined/optional fields:** Stocks with `undefined` values for a filtered field are **excluded** from results when that filter is active. For example, if the P/E filter is set to `< 15`, stocks without a `trailingPE` value are not shown. When no filter is active for a field, stocks with undefined values for that field are included normally.
 
 ## Layout
 
@@ -64,7 +64,7 @@ type PresetName = 'all' | 'value' | 'momentum' | 'megacap' | 'smallcap' | 'near5
 ┌──────────────────────────────────────────────────────────────┐
 │ HEADER BAR                                                    │
 ├──────────────────────────────────────────────────────────────┤
-│ ( Heatmap | Screener )     [toggle at top of full view]       │
+│ ( Heatmap | Screener )                                        │  ← View toggle (shared with HeatmapView)
 ├──────────────────────────────────────────────────────────────┤
 │ ( All | Value | Momentum | Mega Cap | Small Cap | Near 52W Low ) │ ← Preset pills
 ├──────────────────────────────────────────────────────────────┤
@@ -79,6 +79,8 @@ type PresetName = 'all' | 'value' | 'momentum' | 'megacap' | 'smallcap' | 'near5
 └──────────────────────────────────────────────────────────────┘
 ```
 
+The `( Heatmap | Screener )` toggle appears at the same position as HeatmapView's existing `( By Market Cap | By Sector )` toggle. When in Heatmap mode, the market-cap/sector toggle shows. When in Screener mode, the preset pills and filter bar show instead. The view toggle is always visible in both modes.
+
 ### Preset Definitions
 
 | Preset | Label | Filters Applied |
@@ -88,7 +90,7 @@ type PresetName = 'all' | 'value' | 'momentum' | 'megacap' | 'smallcap' | 'near5
 | momentum | Momentum | Change %: >2%, Volume: >1M |
 | megacap | Mega Cap | Market Cap: >500B |
 | smallcap | Small Cap | Market Cap: <10B |
-| near52wlow | Near 52W Low | `fiftyTwoWeekProximity: 'low'` (price within 10% of 52W low) |
+| near52wlow | Near 52W Low | `near52wLow: true` (price within 10% of 52W low) |
 
 ### Filter Dropdowns
 
@@ -118,24 +120,24 @@ Each filter is a dropdown that opens on click:
 
 ### Sortable Table
 
-Extends the existing GridView table with these columns:
+The table columns are a curated subset designed for screening. This deliberately drops `Open`, `Day High`, and `Day Low` from the existing GridView (less useful for screening) and adds `Sector` (essential for screening).
 
 | Column | Sortable | Format |
 |--------|----------|--------|
-| Symbol | Yes | Text, with company logo |
+| Symbol | Yes | Text, with company logo via existing `getLogoUrl()` from `tickerDomains.ts` |
 | Price | Yes | $XXX.XX |
-| Change | Yes | $X.XX (colored) |
-| Change % | Yes | X.XX% (colored) |
+| Change | Yes | $X.XX (colored green/red) |
+| Change % | Yes | X.XX% (colored green/red) |
 | Volume | Yes | Abbreviated (34.5M) |
 | Market Cap | Yes | Abbreviated (3.6T) |
-| P/E | Yes | XX.X or — |
-| Sector | Yes | Text |
+| P/E | Yes | XX.X or — if undefined |
+| Sector | Yes | Text or — if undefined |
 | 52W High | Yes | $XXX.XX |
 | 52W Low | Yes | $XXX.XX |
 
-Sort indicators use Phosphor `SortAscending` / `SortDescending` icons (already in GridView).
+Sort indicators use Phosphor `SortAscending` / `SortDescending` icons.
 
-Click any row → navigate to StockDetail (existing behavior).
+Click any row → navigate to StockDetail (existing behavior via `onSelectStock`).
 
 ## Component Architecture
 
@@ -151,9 +153,10 @@ src/components/
 
 ### Modified Components
 
-- **HeatmapView.tsx:** Add `( Heatmap | Screener )` toggle at top. When "Screener" selected, render ScreenerView instead of heatmap SVG.
-- **App.tsx:** Rename `'grid'` to `'screener'` in view logic. Remove GridView import, add ScreenerView.
+- **HeatmapView.tsx:** Replace the existing `( By Market Cap | By Sector )` toggle with a two-level toggle. Top level: `( Heatmap | Screener )`. When Heatmap is selected, show the `( By Market Cap | By Sector )` sub-toggle below. When Screener is selected, call `onNavigate('screener')` to switch view.
+- **App.tsx:** Replace `'grid'` with `'screener'` in view rendering. Remove GridView import, add ScreenerView. Add validation on localStorage read to default unrecognized view values to `'dashboard'`. Pass `onNavigate` to both HeatmapView and ScreenerView so they can toggle between each other.
 - **types.ts:** Update View type to replace `'grid'` with `'screener'`.
+- **Toolbar.tsx:** This is dead code (not imported by App.tsx since the dashboard redesign). No changes needed — it will be deleted in the cleanup task.
 
 ### Deprecated Components
 
@@ -176,13 +179,13 @@ Filter dropdowns wrap to second row if needed. Table shows all columns.
 
 - All filtering is client-side on ~150 quotes. No performance concerns.
 - Filter state is local to ScreenerView (no persistence needed in v1).
-- Sorting reuses existing GridView's sort logic.
+- Sorting logic ported from existing GridView.
 - `useMemo` on filtered+sorted results keyed on `[quotes, filters, sortKey, sortDir]`.
 
 ## Out of Scope (v1)
 
 - Saving custom screens / filter presets
-- Detail-level filter fields (see memory: project_screener_deferred.md)
+- Detail-level filter fields (deferred — see project memory `project_screener_deferred.md` for full list of fields that need batch detail caching)
 - Export to CSV
 - Column visibility customization
 - Persistent filter state across sessions
