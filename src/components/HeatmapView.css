@@ -1,8 +1,45 @@
 .heatmap-view {
-  padding: 16px 24px 24px;
+  padding: 12px 24px 24px;
   height: calc(100vh - 46px);
   display: flex;
   flex-direction: column;
+}
+
+.heatmap-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.heatmap-controls .pill-group {
+  display: flex;
+  gap: 2px;
+  background: var(--pill-bg);
+  border-radius: 980px;
+  padding: 3px;
+}
+
+.heatmap-controls .pill {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 980px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.heatmap-controls .pill:hover {
+  color: var(--text);
+}
+
+.heatmap-controls .pill.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
 }
 
 .heatmap-svg {
@@ -32,6 +69,11 @@
 .heatmap-tooltip-symbol {
   font-weight: 700;
   font-size: 14px;
+}
+
+.heatmap-tooltip-sector {
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
