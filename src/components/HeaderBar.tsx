@@ -40,11 +40,6 @@ export default function HeaderBar({
 
   return (
     <div className="header-bar">
-      {view !== 'dashboard' && (
-        <button className="header-bar-back" onClick={onBackToDashboard}>
-          &#8592; Dashboard
-        </button>
-      )}
       <div className="header-bar-logo" onClick={onBackToDashboard}>XTOX</div>
 
       <div className={`header-bar-search ${expanded ? 'expanded' : ''}`}>
