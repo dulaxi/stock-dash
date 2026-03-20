@@ -4,6 +4,7 @@ import { Sparkline } from './Sparkline';
 import { getLogoUrl } from '../tickerDomains';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { FlashDiv } from './FlashCell';
+import { X } from '@phosphor-icons/react';
 import './Watchlist.css';
 
 interface WatchlistProps {
@@ -126,7 +127,7 @@ export function Watchlist({ quotes }: WatchlistProps) {
               if (!q) return null;
               return (
                 <div key={t} className="watchlist-card">
-                  <button className="watchlist-remove" onClick={() => removeTicker(t)}>×</button>
+                  <button className="watchlist-remove" onClick={() => removeTicker(t)}><X size={10} weight="bold" /></button>
                   <div className="watchlist-card-header">
                     {getLogoUrl(t) && (
                       <img

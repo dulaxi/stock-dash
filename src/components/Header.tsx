@@ -1,4 +1,5 @@
 import type { PollingSpeed } from '../types';
+import { Sun, Moon } from '@phosphor-icons/react';
 import './Header.css';
 
 interface HeaderProps {
@@ -36,7 +37,7 @@ export function Header({ theme, onThemeToggle, pollingSpeed, onPollingSpeedChang
           ))}
         </div>
         <button className="theme-toggle" onClick={onThemeToggle} aria-label="Toggle theme">
-          {theme === 'dark' ? '☀' : '☾'}
+          {theme === 'dark' ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
         </button>
       </div>
     </header>

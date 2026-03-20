@@ -3,6 +3,7 @@ import type { NewsItem } from '../types';
 import { StockChart } from './StockChart';
 import { FlashDiv } from './FlashCell';
 import { getLogoUrl } from '../tickerDomains';
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import './StockDetail.css';
 
 interface StockDetailProps {
@@ -178,7 +179,7 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
   if (loading || !detail) {
     return (
       <div className="detail-page view-enter">
-        <button className="detail-back" onClick={onBack}>← Back</button>
+        <button className="detail-back" onClick={onBack}><ArrowLeft size={14} weight="bold" /> Back</button>
         <div className="detail-loading">
           <div className="skeleton" style={{ width: 200, height: 32, borderRadius: 6 }} />
           <div className="skeleton" style={{ width: '100%', height: 260, borderRadius: 8, marginTop: 16 }} />
@@ -208,7 +209,7 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
 
   return (
     <div className="detail-page view-enter">
-      <button className="detail-back" onClick={onBack}>← Back</button>
+      <button className="detail-back" onClick={onBack}><ArrowLeft size={14} weight="bold" /> Back</button>
 
       <div className="detail-header">
         <div className="detail-title">
@@ -374,7 +375,7 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
                   <td>{a.date ? new Date(a.date * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}</td>
                   <td>{a.firm}</td>
                   <td className={a.action === 'upgrade' ? 'up' : a.action === 'downgrade' ? 'down' : ''}>{a.action}</td>
-                  <td>{a.fromGrade ? `${a.fromGrade} → ` : ''}{a.toGrade}</td>
+                  <td>{a.fromGrade ? <>{a.fromGrade} <ArrowRight size={12} /> </> : ''}{a.toGrade}</td>
                 </tr>
               ))}
             </tbody>

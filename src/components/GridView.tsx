@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Quote } from '../types';
 import { getLogoUrl } from '../tickerDomains';
 import { FlashCell } from './FlashCell';
+import { SortAscending, SortDescending } from '@phosphor-icons/react';
 import './GridView.css';
 
 interface GridViewProps {
@@ -48,7 +49,7 @@ export function GridView({ quotes, onSelectStock }: GridViewProps) {
     : quotes;
 
   const arrow = (key: SortKey) =>
-    sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
+    sortKey === key ? (sortDir === 'asc' ? <SortAscending size={12} weight="bold" style={{ marginLeft: 2, verticalAlign: 'middle' }} /> : <SortDescending size={12} weight="bold" style={{ marginLeft: 2, verticalAlign: 'middle' }} />) : null;
 
   return (
     <div className="grid-view">

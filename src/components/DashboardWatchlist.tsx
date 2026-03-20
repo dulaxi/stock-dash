@@ -3,6 +3,7 @@ import type { Quote } from '../types';
 import { getLogoUrl } from '../tickerDomains';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { Sparkline } from './Sparkline';
+import { X } from '@phosphor-icons/react';
 
 interface DashboardWatchlistProps {
   quotes: Quote[];
@@ -104,7 +105,7 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
                   {q ? `${up ? '+' : ''}${q.changePercent?.toFixed(1)}%` : '\u2014'}
                 </span>
               </div>
-              <button className="watchlist-row-remove" onClick={e => { e.stopPropagation(); removeTicker(sym); }}>&times;</button>
+              <button className="watchlist-row-remove" onClick={e => { e.stopPropagation(); removeTicker(sym); }}><X size={10} weight="bold" /></button>
             </div>
           );
         })}

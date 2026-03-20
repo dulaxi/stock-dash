@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import type { Market, Quote } from '../types';
 import { getLogoUrl } from '../tickerDomains';
+import { MagnifyingGlass, Sun, Moon } from '@phosphor-icons/react';
 import './HeaderBar.css';
 
 interface HeaderBarProps {
@@ -47,9 +48,7 @@ export default function HeaderBar({
           setExpanded(!expanded);
           setTimeout(() => inputRef.current?.focus(), 100);
         }} aria-label="Search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+          <MagnifyingGlass size={16} weight="bold" />
         </button>
         <input
           ref={inputRef}
@@ -96,7 +95,7 @@ export default function HeaderBar({
         </div>
         <div className="pill-group">
           <button className="pill icon-pill" onClick={onThemeToggle} aria-label="Toggle theme">
-            {theme === 'dark' ? '\u2600' : '\u263E'}
+            {theme === 'dark' ? <Sun size={16} weight="bold" /> : <Moon size={16} weight="bold" />}
           </button>
           <div className="pill status-pill">
             <span className={`status-dot ${marketStatus}`} />

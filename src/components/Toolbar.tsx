@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import type { Market, View, Quote } from '../types';
 import { getLogoUrl } from '../tickerDomains';
+import { MagnifyingGlass } from '@phosphor-icons/react';
 import './Toolbar.css';
 
 interface ToolbarProps {
@@ -60,9 +61,7 @@ export function Toolbar({ market, onMarketChange, view, onViewChange, quotes, on
       <div className={`toolbar-search-wrap ${expanded ? 'expanded' : ''}`}>
         {!expanded && (
           <button className="search-icon-btn" onClick={() => { setExpanded(true); setTimeout(() => inputRef.current?.focus(), 50); }} aria-label="Search">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <MagnifyingGlass size={16} weight="bold" />
           </button>
         )}
         {expanded && (
