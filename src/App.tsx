@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { usePolling } from './hooks/usePolling';
-import { Header } from './components/Header';
-import { Toolbar } from './components/Toolbar';
-import { SummaryView } from './components/SummaryView';
+import HeaderBar from './components/HeaderBar';
+import Dashboard from './components/Dashboard';
+import { StockDetail } from './components/StockDetail';
+import { HeatmapView } from './components/HeatmapView';
 import { TopMoversView } from './components/TopMoversView';
 import { GridView } from './components/GridView';
-import { HeatmapView } from './components/HeatmapView';
-import { StockDetail } from './components/StockDetail';
-import type { Market, View, PollingSpeed } from './types';
+import WatchlistView from './components/WatchlistView';
+import NewsView from './components/NewsView';
+import type { Market, View } from './types';
 import './App.css';
 
 function Skeleton() {
@@ -35,17 +36,11 @@ function Skeleton() {
 
 function App() {
   const [theme, setTheme] = useLocalStorage('xtox-theme', 'dark');
-  const [market, setMarket] = useLocalStorage<Market>('xtox-market', 'nasdaq');
-  const [view, setView] = useLocalStorage<View>('xtox-view', 'summary');
-  const [pollingSpeed, setPollingSpeed] = useLocalStorage<PollingSpeed>('xtox-speed', 5000);
-  const [viewKey, setViewKey] = useState(0);
+  const [market, setMarket] = useLocalStorage<Market>('xtox-market', 'all');
+  const [view, setView] = useLocalStorage<View>('xtox-view', 'dashboard');
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
 
-  const { quotes, indices, loading, switching, error } = usePolling(market, pollingSpeed);
-
-  useEffect(() => {
-    setViewKey(k => k + 1);
-  }, [view]);
+  const { quotes, indices, loading, error } = usePolling(market, 10000);
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -53,7 +48,6 @@ function App() {
     document.documentElement.dataset.theme = next;
   };
 
-  // Market status based on US Eastern Time
   const getMarketStatus = (): string => {
     const now = new Date();
     const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
@@ -62,25 +56,37 @@ function App() {
     const day = et.getDay();
     if (day === 0 || day === 6) return 'closed';
     const mins = h * 60 + m;
-    if (mins >= 570 && mins < 960) return 'open'; // 9:30 AM - 4:00 PM
-    if (mins >= 240 && mins < 570) return 'pre'; // 4:00 AM - 9:30 AM
+    if (mins >= 570 && mins < 960) return 'open';
+    if (mins >= 240 && mins < 570) return 'pre';
     return 'closed';
   };
 
   const marketStatus = getMarketStatus();
 
+  const handleBackToDashboard = () => {
+    setSelectedStock(null);
+    setView('dashboard');
+  };
+
+  const handleNavigate = (v: string) => {
+    setView(v as View);
+  };
+
   const headerProps = {
+    market,
+    onMarketChange: setMarket,
     theme,
     onThemeToggle: toggleTheme,
-    pollingSpeed,
-    onPollingSpeedChange: setPollingSpeed,
     marketStatus,
+    quotes,
+    onSelectStock: setSelectedStock,
+    onBackToDashboard: handleBackToDashboard,
   };
 
   if (selectedStock) {
     return (
       <div className="app">
-        <Header {...headerProps} />
+        <HeaderBar {...headerProps} view="detail" />
         <StockDetail symbol={selectedStock} onBack={() => setSelectedStock(null)} />
       </div>
     );
@@ -88,31 +94,28 @@ function App() {
 
   return (
     <div className="app">
-      <Header {...headerProps} />
-      <Toolbar
-        market={market}
-        onMarketChange={setMarket}
-        view={view}
-        onViewChange={setView}
-        quotes={quotes}
-        onSelectStock={setSelectedStock}
-      />
-
-      <main className={`content${switching ? ' switching' : ''}`}>
-        {error && <div className="error-banner">Connection lost. Retrying...</div>}
-        {loading ? (
-          <Skeleton />
-        ) : quotes.length === 0 ? (
-          <div className="state-msg">No data available</div>
-        ) : (
-          <div key={viewKey} className="view-enter">
-            {view === 'summary' && <SummaryView quotes={quotes} indices={indices} market={market} onSelectStock={setSelectedStock} />}
-            {view === 'movers' && <TopMoversView quotes={quotes} onSelectStock={setSelectedStock} />}
-            {view === 'grid' && <GridView quotes={quotes} onSelectStock={setSelectedStock} />}
-            {view === 'heatmap' && <HeatmapView quotes={quotes} onSelectStock={setSelectedStock} />}
-          </div>
-        )}
-      </main>
+      <HeaderBar {...headerProps} view={view} />
+      {error && <div className="error-banner">Connection lost. Retrying...</div>}
+      {loading ? (
+        <Skeleton />
+      ) : (
+        <>
+          {view === 'dashboard' && (
+            <Dashboard
+              quotes={quotes}
+              indices={indices}
+              market={market}
+              onSelectStock={setSelectedStock}
+              onNavigate={handleNavigate}
+            />
+          )}
+          {view === 'heatmap' && <HeatmapView quotes={quotes} onSelectStock={setSelectedStock} />}
+          {view === 'movers' && <TopMoversView quotes={quotes} onSelectStock={setSelectedStock} />}
+          {view === 'grid' && <GridView quotes={quotes} onSelectStock={setSelectedStock} />}
+          {view === 'watchlist' && <WatchlistView quotes={quotes} onSelectStock={setSelectedStock} />}
+          {view === 'news' && <NewsView market={market} />}
+        </>
+      )}
     </div>
   );
 }

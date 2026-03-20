@@ -32,6 +32,8 @@ export const DOW_30 = [
 
 export const INDEX_SYMBOLS = ['^IXIC', '^GSPC', '^DJI'];
 
+export const ALL_SYMBOLS = [...new Set([...NASDAQ_100, ...SP_500, ...DOW_30])];
+
 export const MARKET_MAP = {
   nasdaq: NASDAQ_100,
   sp500: SP_500,

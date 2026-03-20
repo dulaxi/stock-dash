@@ -1,0 +1,231 @@
+.header-bar {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-bar-logo {
+  font-family: 'Tanker', sans-serif;
+  font-size: 20px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.header-bar-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.header-bar-back:hover {
+  background: var(--pill-bg);
+}
+
+.header-bar-search {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.header-bar-search input {
+  width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: width 0.25s ease, padding 0.25s ease;
+}
+
+.header-bar-search.expanded input {
+  width: 240px;
+  padding: 6px 12px;
+  background: var(--pill-bg);
+  border-radius: 8px;
+}
+
+.header-bar-search-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.header-bar-search-btn:hover {
+  background: var(--pill-bg);
+}
+
+.header-bar-search-results {
+  position: absolute;
+  top: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  z-index: 200;
+}
+
+.header-bar-search-results .search-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  border: none;
+  background: none;
+  width: 100%;
+  font-family: inherit;
+  text-align: left;
+}
+
+.header-bar-search-results .search-item:hover {
+  background: var(--pill-bg);
+}
+
+.header-bar-search-results .search-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-bar-search-results .search-item-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.header-bar-search-results .search-item-symbol {
+  font-weight: 600;
+}
+
+.header-bar-search-results .search-item-name {
+  color: var(--text-secondary);
+  font-size: 11px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-bar .pill-group {
+  display: flex;
+  gap: 2px;
+  background: var(--pill-bg);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.header-bar .pill {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.header-bar .pill.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.header-bar .hb-market-status {
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.header-bar .hb-market-status .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.header-bar .hb-market-status .status-dot.open {
+  background: var(--positive);
+}
+
+.header-bar .hb-market-status .status-dot.pre {
+  background: #ff9f0a;
+}
+
+.header-bar .hb-market-status .status-dot.closed {
+  background: var(--text-secondary);
+}
+
+.header-bar .hb-theme-toggle {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+}
+
+.header-bar .hb-theme-toggle:hover {
+  background: var(--pill-bg);
+}
+
+@media (max-width: 768px) {
+  .header-bar {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .header-bar-search.expanded input {
+    width: 160px;
+  }
+
+  .header-bar .hb-market-status {
+    display: none;
+  }
+}

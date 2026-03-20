@@ -30,8 +30,9 @@ export function usePolling(market: Market, speed: PollingSpeed): PollingState {
 
     const fetchData = async () => {
       try {
+        const quotesUrl = market === 'all' ? '/api/quotes/all' : `/api/quotes/${market}`;
         const [quotesRes, indicesRes] = await Promise.all([
-          fetch(`/api/quotes/${market}`),
+          fetch(quotesUrl),
           fetch('/api/indices'),
         ]);
 
@@ -61,7 +62,8 @@ export function usePolling(market: Market, speed: PollingSpeed): PollingState {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, speed);
+    const effectiveSpeed = market === 'all' ? Math.max(speed, 10000) : speed;
+    const interval = setInterval(fetchData, effectiveSpeed);
     return () => { cancelled = true; clearInterval(interval); };
   }, [market, speed]);
 

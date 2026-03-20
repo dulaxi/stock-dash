@@ -1,0 +1,525 @@
+/* ── Dashboard layout ─────────────────────────────── */
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 46px);
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── Index strip ─────────────────────────────────── */
+
+.index-strip {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 16px;
+  gap: 24px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.index-strip-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.index-strip-name {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.index-strip-price {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.index-strip-change {
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.index-strip-change.up {
+  color: var(--positive);
+}
+
+.index-strip-change.down {
+  color: var(--negative);
+}
+
+/* ── Sector strip ────────────────────────────────── */
+
+.sector-strip {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  gap: 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sector-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.sector-strip-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.sector-strip-name {
+  color: var(--text-secondary);
+}
+
+.sector-strip-change {
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.sector-strip-change.up {
+  color: var(--positive);
+}
+
+.sector-strip-change.down {
+  color: var(--negative);
+}
+
+/* ── Main area (heatmap + sidebar) ───────────────── */
+
+.dashboard-main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Heatmap panel ───────────────────────────────── */
+
+.dashboard-heatmap {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.dashboard-heatmap-container {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.dashboard-heatmap-container svg {
+  display: block;
+}
+
+.heatmap-tooltip {
+  position: fixed;
+  z-index: 300;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.heatmap-tooltip-symbol {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.heatmap-tooltip-name {
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ── Sidebar ─────────────────────────────────────── */
+
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Watchlist panel ─────────────────────────────── */
+
+.dashboard-watchlist {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.dashboard-watchlist-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pill-bg) transparent;
+}
+
+.watchlist-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.watchlist-add {
+  padding: 8px 12px;
+}
+
+.watchlist-add-input {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.watchlist-add-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.watchlist-add-input:focus {
+  border-color: var(--accent);
+}
+
+.watchlist-dropdown {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  z-index: 200;
+}
+
+.watchlist-dropdown-item {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.watchlist-dropdown-item:hover {
+  background: var(--pill-bg);
+}
+
+.watchlist-dropdown-item .text-secondary {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.watchlist-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.watchlist-row:hover {
+  background: var(--pill-bg);
+}
+
+.watchlist-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.watchlist-row-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.watchlist-row-symbol {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.watchlist-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.watchlist-row-change {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 48px;
+  text-align: right;
+}
+
+.watchlist-row-change.up {
+  color: var(--positive);
+}
+
+.watchlist-row-change.down {
+  color: var(--negative);
+}
+
+.watchlist-row-remove {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.watchlist-row:hover .watchlist-row-remove {
+  opacity: 1;
+}
+
+.watchlist-row-remove:hover {
+  color: var(--negative);
+}
+
+/* ── Movers panel ────────────────────────────────── */
+
+.dashboard-movers {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.movers-section {
+  padding: 4px 0;
+}
+
+.movers-label {
+  padding: 4px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.movers-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.movers-row:hover {
+  background: var(--pill-bg);
+}
+
+.movers-symbol {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.movers-change {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.movers-change.up {
+  color: var(--positive);
+}
+
+.movers-change.down {
+  color: var(--negative);
+}
+
+/* ── News strip ──────────────────────────────────── */
+
+.news-strip {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  gap: 12px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.news-strip-items {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(to right, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, black 90%, transparent);
+}
+
+.news-strip-link {
+  color: var(--text);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.12s ease;
+}
+
+.news-strip-link:hover {
+  color: var(--accent);
+}
+
+.news-strip-divider {
+  color: var(--border);
+  font-size: 12px;
+  margin: 0 4px;
+}
+
+/* ── Panel shared styles ─────────────────────────── */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 6px;
+  flex-shrink: 0;
+}
+
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.panel-see-all {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.12s ease;
+}
+
+.panel-see-all:hover {
+  background: var(--pill-bg);
+}
+
+/* ── Responsive: tablet ──────────────────────────── */
+
+@media (max-width: 1200px) {
+  .dashboard-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .dashboard-sidebar {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    flex-direction: row;
+    max-height: 200px;
+  }
+
+  .dashboard-watchlist {
+    flex: 1;
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+  }
+
+  .dashboard-movers {
+    flex: 1;
+  }
+}
+
+/* ── Responsive: mobile ──────────────────────────── */
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    overflow-y: auto;
+  }
+
+  .dashboard-heatmap {
+    min-height: 280px;
+  }
+
+  .dashboard-sidebar {
+    flex-direction: column;
+    max-height: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .dashboard-watchlist {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 240px;
+  }
+
+  .dashboard-movers {
+    max-height: 240px;
+  }
+
+  .index-strip {
+    padding: 0 12px;
+    gap: 16px;
+  }
+
+  .sector-strip {
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .news-strip {
+    padding: 0 12px;
+  }
+}

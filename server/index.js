@@ -1,6 +1,7 @@
 import express from 'express';
 import YahooFinance from 'yahoo-finance2';
-import { MARKET_MAP, INDEX_SYMBOLS } from './symbols.js';
+import { MARKET_MAP, INDEX_SYMBOLS, ALL_SYMBOLS } from './symbols.js';
+import { SECTOR_MAP } from './sectors.js';
 import { cacheGet, cacheSet } from './cache.js';
 
 const yahooFinance = new YahooFinance();
@@ -21,6 +22,7 @@ function mapQuote(q) {
     fiftyTwoWeekHigh: q.fiftyTwoWeekHigh,
     fiftyTwoWeekLow: q.fiftyTwoWeekLow,
     trailingPE: q.trailingPE,
+    shortName: q.shortName,
   };
 }
 
@@ -40,6 +42,31 @@ async function fetchQuotes(symbols) {
   return all;
 }
 
+// GET /api/quotes/all — all tracked symbols with sector data
+// IMPORTANT: must be registered BEFORE /api/quotes/:market
+app.get('/api/quotes/all', async (req, res) => {
+  const key = 'quotes-all';
+  const cached = cacheGet(key);
+  if (cached && !cached.stale) return res.json(cached.data);
+  if (cached) {
+    res.json(cached.data);
+    fetchQuotes(ALL_SYMBOLS).then(data => {
+      const withSector = data.map(q => ({ ...q, sector: SECTOR_MAP[q.symbol] || null }));
+      cacheSet(key, withSector, 10000);
+    }).catch(() => {});
+    return;
+  }
+  try {
+    const data = await fetchQuotes(ALL_SYMBOLS);
+    const withSector = data.map(q => ({ ...q, sector: SECTOR_MAP[q.symbol] || null }));
+    cacheSet(key, withSector, 10000);
+    res.json(withSector);
+  } catch (e) {
+    console.error('Error fetching all quotes:', e);
+    res.status(500).json({ error: 'Failed to fetch quotes' });
+  }
+});
+
 // GET /api/quotes/:market (nasdaq | sp500 | dow)
 app.get('/api/quotes/:market', async (req, res) => {
   const market = req.params.market;
@@ -51,14 +78,18 @@ app.get('/api/quotes/:market', async (req, res) => {
   if (cached && !cached.stale) return res.json(cached.data);
   if (cached?.stale) {
     res.json(cached.data);
-    fetchQuotes(symbols).then(data => cacheSet(cacheKey, data)).catch(() => {});
+    fetchQuotes(symbols).then(data => {
+      const withSector = data.map(q => ({ ...q, sector: SECTOR_MAP[q.symbol] || null }));
+      cacheSet(cacheKey, withSector, 10000);
+    }).catch(() => {});
     return;
   }
 
   try {
     const data = await fetchQuotes(symbols);
-    cacheSet(cacheKey, data, 10000); // 10s cache
-    res.json(data);
+    const withSector = data.map(q => ({ ...q, sector: SECTOR_MAP[q.symbol] || null }));
+    cacheSet(cacheKey, withSector, 10000); // 10s cache
+    res.json(withSector);
   } catch (error) {
     console.error(`Error fetching ${market}:`, error);
     res.status(500).json({ error: 'Failed to fetch quotes' });
@@ -93,6 +124,57 @@ app.get('/api/indices', async (_req, res) => {
     console.error('Error fetching indices:', error);
     res.status(500).json({ error: 'Failed to fetch indices' });
   }
+});
+
+// GET /api/quote/:symbol — single quote with sector
+app.get('/api/quote/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+  const key = `quote-${symbol.toUpperCase()}`;
+  const cached = cacheGet(key);
+  if (cached && !cached.stale) return res.json(cached.data);
+  try {
+    const raw = await yahooFinance.quote(symbol.toUpperCase());
+    const data = { ...mapQuote(raw), sector: SECTOR_MAP[symbol.toUpperCase()] || null };
+    cacheSet(key, data, 10000);
+    res.json(data);
+  } catch (e) {
+    if (cached) return res.json(cached.data);
+    res.status(404).json({ error: 'Symbol not found' });
+  }
+});
+
+// GET /api/sectors?market= — sector performance computed from cached quotes
+app.get('/api/sectors', async (req, res) => {
+  const market = req.query.market || 'all';
+  const key = `sectors-${market}`;
+  const cached = cacheGet(key);
+  if (cached && !cached.stale) return res.json(cached.data);
+
+  // Get quotes for the requested market
+  const quotesKey = market === 'all' ? 'quotes-all' : `quotes-${market}`;
+  const quotesCache = cacheGet(quotesKey);
+  if (!quotesCache) return res.json([]);
+
+  const quotes = quotesCache.data;
+  const sectorMap = {};
+  for (const q of quotes) {
+    const sector = SECTOR_MAP[q.symbol];
+    if (!sector) continue;
+    if (!sectorMap[sector]) sectorMap[sector] = { total: 0, count: 0 };
+    sectorMap[sector].total += q.changePercent || 0;
+    sectorMap[sector].count += 1;
+  }
+
+  const sectors = Object.entries(sectorMap)
+    .map(([sector, { total, count }]) => ({
+      sector,
+      changePercent: +(total / count).toFixed(2),
+      stockCount: count,
+    }))
+    .sort((a, b) => b.stockCount - a.stockCount);
+
+  cacheSet(key, sectors, 30000);
+  res.json(sectors);
 });
 
 // GET /api/chart/:symbol (intraday)

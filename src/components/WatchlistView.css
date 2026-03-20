@@ -1,0 +1,103 @@
+.watchlist-view {
+  padding: 0 32px 32px;
+}
+
+.watchlist-view-title {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.watchlist-view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.watchlist-view-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  animation: rowFadeIn 0.3s ease both;
+}
+
+.watchlist-view-card:hover {
+  background: var(--pill-active-bg);
+  transform: translateY(-2px);
+}
+
+.watchlist-view-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.watchlist-view-card-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.watchlist-view-card-symbol {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.watchlist-view-card-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 10px;
+}
+
+.watchlist-view-card-chart {
+  margin-bottom: 10px;
+}
+
+.watchlist-view-card-price {
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 2px;
+}
+
+.watchlist-view-card-change {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.watchlist-view-card-change.up {
+  color: var(--positive);
+}
+
+.watchlist-view-card-change.down {
+  color: var(--negative);
+}
+
+.watchlist-view-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+@media (max-width: 600px) {
+  .watchlist-view {
+    padding: 0 16px 16px;
+  }
+
+  .watchlist-view-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
