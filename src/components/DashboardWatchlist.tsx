@@ -133,7 +133,7 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
         {tickers.length === 0 && (
           <div className="watchlist-empty">Add tickers to start your watchlist</div>
         )}
-        {tickers.slice(0, 8).map(sym => {
+        {tickers.map(sym => {
           const q = getQuote(sym);
           const logo = getLogo(sym);
           const data = charts[sym] || [];
