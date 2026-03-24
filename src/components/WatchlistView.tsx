@@ -127,10 +127,10 @@ export default function WatchlistView({ quotes, onSelectStock }: WatchlistViewPr
     return () => obs.disconnect();
   }, []);
 
-  // Fetch Finnhub logos for tickers without local logo
+  // Fetch Finnhub logos for all tickers (higher quality than Google favicon)
   useEffect(() => {
     tickers.forEach(sym => {
-      if (getLogoUrl(sym) || logos[sym]) return;
+      if (logos[sym]) return;
       fetch(`/api/profile/${sym}`)
         .then(r => r.json())
         .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [sym]: data.logo })); })
@@ -204,7 +204,7 @@ export default function WatchlistView({ quotes, onSelectStock }: WatchlistViewPr
       <div className="watchlist-view-grid">
         {tickers.map(sym => {
           const q = getQuote(sym);
-          const logo = getLogoUrl(sym) || logos[sym] || null;
+          const logo = logos[sym] || getLogoUrl(sym) || null;
           const data = charts[sym] || [];
           const up = (q?.changePercent || 0) >= 0;
 

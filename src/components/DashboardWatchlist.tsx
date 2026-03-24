@@ -51,10 +51,10 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
     });
   }, [tickers]);
 
-  // Fetch Finnhub logos for tickers without local logo
+  // Fetch Finnhub logos for all tickers (higher quality than Google favicon)
   useEffect(() => {
     tickers.forEach(sym => {
-      if (getLogoUrl(sym) || logos[sym]) return;
+      if (logos[sym]) return;
       fetch(`/api/profile/${sym}`)
         .then(r => r.json())
         .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [sym]: data.logo })); })
@@ -63,7 +63,7 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
   }, [tickers]);
 
   const getQuote = (sym: string): Quote | undefined => quoteMap.get(sym) || extraQuotes[sym];
-  const getLogo = (sym: string): string | null => getLogoUrl(sym) || logos[sym] || null;
+  const getLogo = (sym: string): string | null => logos[sym] || getLogoUrl(sym) || null;
 
   // Local matches (instant)
   const localResults = search
