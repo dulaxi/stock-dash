@@ -9,6 +9,7 @@ import { TopMoversView } from './components/TopMoversView';
 import ScreenerView from './components/ScreenerView';
 import WatchlistView from './components/WatchlistView';
 import NewsView from './components/NewsView';
+import CompareView from './components/CompareView';
 import type { Market, View } from './types';
 import './App.css';
 
@@ -38,9 +39,10 @@ function App() {
   const [theme, setTheme] = useLocalStorage('xtox-theme', 'dark');
   const [market, setMarket] = useLocalStorage<Market>('xtox-market', 'all');
   const [storedView, setView] = useLocalStorage<View>('xtox-view', 'dashboard');
-  const VALID_VIEWS: View[] = ['dashboard', 'heatmap', 'movers', 'screener', 'watchlist', 'news'];
+  const VALID_VIEWS: View[] = ['dashboard', 'heatmap', 'movers', 'screener', 'watchlist', 'news', 'compare'];
   const view = VALID_VIEWS.includes(storedView) ? storedView : 'dashboard';
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
+  const [compareSymbols, setCompareSymbols] = useState<string[]>([]);
 
   const { quotes, indices, loading, error } = usePolling(market, 10000);
 
@@ -74,6 +76,12 @@ function App() {
     setView(v as View);
   };
 
+  const handleCompare = (symbol: string) => {
+    setCompareSymbols([symbol]);
+    setSelectedStock(null);
+    setView('compare');
+  };
+
   const headerProps = {
     market,
     onMarketChange: setMarket,
@@ -89,7 +97,7 @@ function App() {
     return (
       <div className="app">
         <HeaderBar {...headerProps} view="detail" />
-        <StockDetail symbol={selectedStock} onBack={() => setSelectedStock(null)} />
+        <StockDetail symbol={selectedStock} onBack={() => setSelectedStock(null)} onCompare={handleCompare} />
       </div>
     );
   }
@@ -116,6 +124,7 @@ function App() {
           {view === 'screener' && <ScreenerView quotes={quotes} onSelectStock={setSelectedStock} onNavigate={handleNavigate} />}
           {view === 'watchlist' && <WatchlistView quotes={quotes} onSelectStock={setSelectedStock} />}
           {view === 'news' && <NewsView market={market} />}
+          {view === 'compare' && <CompareView initialSymbols={compareSymbols} onSelectStock={setSelectedStock} />}
         </>
       )}
     </div>

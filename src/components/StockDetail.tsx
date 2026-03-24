@@ -3,13 +3,14 @@ import type { NewsItem } from '../types';
 import { StockChart } from './StockChart';
 import { FlashDiv } from './FlashCell';
 import { getLogoUrl } from '../tickerDomains';
-import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, ArrowsLeftRight } from '@phosphor-icons/react';
 import MetricTooltip from './MetricTooltip';
 import './StockDetail.css';
 
 interface StockDetailProps {
   symbol: string;
   onBack: () => void;
+  onCompare?: (symbol: string) => void;
 }
 
 interface Detail {
@@ -151,7 +152,7 @@ function ExpandableText({ text }: { text: string }) {
   );
 }
 
-export function StockDetail({ symbol, onBack }: StockDetailProps) {
+export function StockDetail({ symbol, onBack, onCompare }: StockDetailProps) {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -219,7 +220,14 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
 
   return (
     <div className="detail-page view-enter">
-      <button className="detail-back" onClick={onBack}><ArrowLeft size={14} weight="bold" /> Back</button>
+      <div className="detail-top-bar">
+        <button className="detail-back" onClick={onBack}><ArrowLeft size={14} weight="bold" /> Back</button>
+        {onCompare && (
+          <button className="detail-compare-btn" onClick={() => onCompare(symbol)}>
+            <ArrowsLeftRight size={14} weight="bold" /> Compare
+          </button>
+        )}
+      </div>
 
       <div className="detail-header">
         <div className="detail-title">

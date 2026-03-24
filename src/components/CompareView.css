@@ -1,0 +1,368 @@
+.compare-view {
+  min-height: 100%;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+.compare-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.compare-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  margin: 0;
+}
+
+.compare-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--pill-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.compare-add-btn:hover {
+  background: var(--pill-active-bg);
+}
+
+.compare-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Search dropdown */
+.compare-search-wrapper {
+  position: relative;
+}
+
+.compare-search {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 320px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.compare-search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.compare-search-input input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.compare-search-input input::placeholder {
+  color: var(--text-secondary);
+}
+
+.compare-search-input svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.compare-search-results {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.compare-search-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+
+.compare-search-item:hover {
+  background: var(--pill-bg);
+}
+
+.compare-search-item-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.compare-search-item-symbol {
+  font-weight: 700;
+  min-width: 60px;
+}
+
+.compare-search-item-name {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Empty state */
+.compare-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  padding: 80px 0;
+}
+
+.compare-empty-icon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.compare-empty p {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Table */
+.compare-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.compare-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 8px 14px;
+  text-align: right;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.compare-table th:first-child,
+.compare-table td:first-child {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: var(--bg);
+  z-index: 2;
+  min-width: 110px;
+}
+
+/* Stock column headers */
+.compare-stock-header {
+  vertical-align: top;
+  padding: 16px 14px !important;
+  min-width: 160px;
+}
+
+.compare-stock-header-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  position: relative;
+}
+
+.compare-stock-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.compare-stock-symbol {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.compare-stock-symbol:hover {
+  opacity: 0.8;
+}
+
+.compare-stock-name {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.compare-stock-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.compare-stock-change {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.compare-stock-change.positive {
+  color: var(--positive);
+}
+
+.compare-stock-change.negative {
+  color: var(--negative);
+}
+
+/* Remove button */
+.compare-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: var(--pill-bg);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.compare-stock-header:hover .compare-remove {
+  opacity: 1;
+}
+
+.compare-remove:hover {
+  background: var(--negative);
+  color: #fff;
+}
+
+/* Section titles */
+.compare-section-title td {
+  padding: 14px 14px 6px !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Metric label */
+.compare-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.compare-label .metric-tooltip-trigger {
+  color: var(--text-secondary);
+}
+
+/* Cells */
+.compare-cell {
+  font-variant-numeric: tabular-nums;
+  transition: background 0.2s ease;
+}
+
+.compare-cell.best {
+  background: rgba(52, 199, 89, 0.08);
+}
+
+.compare-cell.worst {
+  background: rgba(255, 59, 48, 0.08);
+}
+
+/* Corner cell (top-left) */
+.compare-corner {
+  background: var(--bg) !important;
+}
+
+/* Loading skeleton */
+.compare-skeleton {
+  display: inline-block;
+  width: 60px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--pill-bg);
+  animation: comparePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes comparePulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .compare-view {
+    padding: 16px 12px;
+  }
+
+  .compare-header h2 {
+    font-size: 15px;
+  }
+
+  .compare-add-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .compare-search {
+    width: 280px;
+    right: -12px;
+  }
+
+  .compare-table th,
+  .compare-table td {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .compare-stock-header {
+    min-width: 130px;
+  }
+}

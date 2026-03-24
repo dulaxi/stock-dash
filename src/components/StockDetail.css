@@ -4,6 +4,13 @@
   margin: 0 auto;
 }
 
+.detail-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .detail-back {
   font-family: inherit;
   font-size: 13px;
@@ -13,8 +20,31 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   transition: opacity 0.15s;
+}
+
+.detail-compare-btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 980px;
+  border: none;
+  background: var(--pill-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.detail-compare-btn:hover {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
 }
 
 .detail-back:hover {
