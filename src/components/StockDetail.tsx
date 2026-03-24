@@ -154,9 +154,11 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [finnhubLogo, setFinnhubLogo] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
+    setFinnhubLogo(null);
     const fetchDetail = () => {
       fetch(`/api/detail/${encodeURIComponent(symbol)}`)
         .then(r => r.json())
@@ -168,8 +170,17 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
     return () => clearInterval(interval);
   }, [symbol]);
 
+  // Fetch Finnhub logo as fallback when local logo isn't available
   useEffect(() => {
-    // Fetch news using the ticker as a search query via the backend
+    if (!getLogoUrl(symbol)) {
+      fetch(`/api/profile/${encodeURIComponent(symbol)}`)
+        .then(r => r.json())
+        .then(data => { if (data.logo) setFinnhubLogo(data.logo); })
+        .catch(() => {});
+    }
+  }, [symbol]);
+
+  useEffect(() => {
     fetch(`/api/ticker-news/${encodeURIComponent(symbol)}`)
       .then(r => r.json())
       .then(setNews)
@@ -213,10 +224,10 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
 
       <div className="detail-header">
         <div className="detail-title">
-          {getLogoUrl(detail.symbol) && (
+          {(getLogoUrl(detail.symbol) || finnhubLogo) && (
             <img
               className="detail-logo"
-              src={getLogoUrl(detail.symbol)!}
+              src={getLogoUrl(detail.symbol) || finnhubLogo!}
               alt=""
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
