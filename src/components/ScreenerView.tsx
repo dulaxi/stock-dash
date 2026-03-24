@@ -5,6 +5,7 @@ import ScreenerFiltersBar, { EMPTY_FILTERS } from './ScreenerFilters';
 import { getLogoUrl } from '../tickerDomains';
 import { SortAscending, SortDescending } from '@phosphor-icons/react';
 import { FlashCell } from './FlashCell';
+import MetricTooltip from './MetricTooltip';
 import './ScreenerView.css';
 
 interface ScreenerViewProps {
@@ -166,15 +167,15 @@ export default function ScreenerView({ quotes, onSelectStock, onNavigate }: Scre
           <thead>
             <tr>
               <th onClick={() => handleSort('symbol')}>Symbol{arrow('symbol')}</th>
-              <th className="num" onClick={() => handleSort('price')}>Price{arrow('price')}</th>
-              <th className="num" onClick={() => handleSort('change')}>Change{arrow('change')}</th>
-              <th className="num" onClick={() => handleSort('changePercent')}>Change%{arrow('changePercent')}</th>
-              <th className="num" onClick={() => handleSort('volume')}>Volume{arrow('volume')}</th>
-              <th className="num" onClick={() => handleSort('marketCap')}>Mkt Cap{arrow('marketCap')}</th>
-              <th className="num" onClick={() => handleSort('trailingPE')}>P/E{arrow('trailingPE')}</th>
-              <th onClick={() => handleSort('sector')}>Sector{arrow('sector')}</th>
-              <th className="num col-52w" onClick={() => handleSort('fiftyTwoWeekHigh')}>52W High{arrow('fiftyTwoWeekHigh')}</th>
-              <th className="num col-52w" onClick={() => handleSort('fiftyTwoWeekLow')}>52W Low{arrow('fiftyTwoWeekLow')}</th>
+              <th className="num" onClick={() => handleSort('price')}><MetricTooltip metricKey="price">Price</MetricTooltip>{arrow('price')}</th>
+              <th className="num" onClick={() => handleSort('change')}><MetricTooltip metricKey="change">Change</MetricTooltip>{arrow('change')}</th>
+              <th className="num" onClick={() => handleSort('changePercent')}><MetricTooltip metricKey="changePercent">Change%</MetricTooltip>{arrow('changePercent')}</th>
+              <th className="num" onClick={() => handleSort('volume')}><MetricTooltip metricKey="volume">Volume</MetricTooltip>{arrow('volume')}</th>
+              <th className="num" onClick={() => handleSort('marketCap')}><MetricTooltip metricKey="marketCap">Mkt Cap</MetricTooltip>{arrow('marketCap')}</th>
+              <th className="num" onClick={() => handleSort('trailingPE')}><MetricTooltip metricKey="pe">P/E</MetricTooltip>{arrow('trailingPE')}</th>
+              <th onClick={() => handleSort('sector')}><MetricTooltip metricKey="sector">Sector</MetricTooltip>{arrow('sector')}</th>
+              <th className="num col-52w" onClick={() => handleSort('fiftyTwoWeekHigh')}><MetricTooltip metricKey="fiftyTwoWeekHigh">52W High</MetricTooltip>{arrow('fiftyTwoWeekHigh')}</th>
+              <th className="num col-52w" onClick={() => handleSort('fiftyTwoWeekLow')}><MetricTooltip metricKey="fiftyTwoWeekLow">52W Low</MetricTooltip>{arrow('fiftyTwoWeekLow')}</th>
             </tr>
           </thead>
           <tbody>

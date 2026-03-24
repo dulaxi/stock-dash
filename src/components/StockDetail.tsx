@@ -4,6 +4,7 @@ import { StockChart } from './StockChart';
 import { FlashDiv } from './FlashCell';
 import { getLogoUrl } from '../tickerDomains';
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import MetricTooltip from './MetricTooltip';
 import './StockDetail.css';
 
 interface StockDetailProps {
@@ -198,22 +199,22 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
     );
   }
 
-  // Finviz-style rows: each row has 3 label-value pairs (6 cells)
-  const statsRows: [string, string][][] = [
-    [['Market Cap', fmt(detail.marketCap)], ['P/E', fmt(detail.trailingPE)], ['EPS (ttm)', fmt(detail.epsTrailing)]],
-    [['Enterprise Value', fmt(detail.enterpriseValue)], ['Forward P/E', fmt(detail.forwardPE)], ['EPS (fwd)', fmt(detail.epsForward)]],
-    [['Revenue', fmt(detail.marketCap && detail.priceToSales ? detail.marketCap / detail.priceToSales : undefined)], ['PEG', fmt(detail.peg)], ['Gross Margin', pct(detail.grossMargin)]],
-    [['Net Income', fmt(detail.epsTrailing && detail.sharesOutstanding ? detail.epsTrailing * detail.sharesOutstanding : undefined)], ['P/S', fmt(detail.priceToSales)], ['Oper. Margin', pct(detail.operatingMargin)]],
-    [['Shares Out', fmt(detail.sharesOutstanding)], ['P/B', fmt(detail.priceToBook)], ['Profit Margin', pct(detail.profitMargin)]],
-    [['Float', fmt(detail.floatShares)], ['EV/EBITDA', fmt(detail.evToEbitda)], ['ROE', pct(detail.returnOnEquity)]],
-    [['Prev Close', '$' + fmt(detail.prevClose)], ['ROA', pct(detail.returnOnAssets)], ['Beta', fmt(detail.beta)]],
-    [['Open', '$' + fmt(detail.open)], ['Debt/Eq', fmt(detail.debtToEquity)], ['Book/sh', '$' + fmt(detail.bookValue)]],
-    [['Day High', '$' + fmt(detail.dayHigh)], ['Current Ratio', fmt(detail.currentRatio)], ['SMA 50', '$' + fmt(detail.fiftyDayAvg)]],
-    [['Day Low', '$' + fmt(detail.dayLow)], ['Quick Ratio', fmt(detail.quickRatio)], ['SMA 200', '$' + fmt(detail.twoHundredDayAvg)]],
-    [['52W High', '$' + fmt(detail.fiftyTwoWeekHigh)], ['Volume', fmt(detail.volume, 0)], ['Short Ratio', fmt(detail.shortRatio)]],
-    [['52W Low', '$' + fmt(detail.fiftyTwoWeekLow)], ['Avg Volume', fmt(detail.avgVolume, 0)], ['Short % Float', pct(detail.shortPercentOfFloat)]],
-    [['Dividend', detail.dividendRate ? `$${fmt(detail.dividendRate)} (${pct(detail.dividendYield)})` : '—'], ['Payout Ratio', pct(detail.payoutRatio)], ['Sector', detail.sector || '—']],
-    [['Ex-Div Date', detail.exDividendDate ? new Date(detail.exDividendDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'], ['Industry', detail.industry || '—'], ['Employees', detail.employees ? detail.employees.toLocaleString() : '—']],
+  // Finviz-style rows: each row has 3 [label, value, metricKey] tuples
+  const statsRows: [string, string, string][][] = [
+    [['Market Cap', fmt(detail.marketCap), 'marketCap'], ['P/E', fmt(detail.trailingPE), 'pe'], ['EPS (ttm)', fmt(detail.epsTrailing), 'eps']],
+    [['Enterprise Value', fmt(detail.enterpriseValue), 'enterpriseValue'], ['Forward P/E', fmt(detail.forwardPE), 'forwardPE'], ['EPS (fwd)', fmt(detail.epsForward), 'epsForward']],
+    [['Revenue', fmt(detail.marketCap && detail.priceToSales ? detail.marketCap / detail.priceToSales : undefined), 'revenue'], ['PEG', fmt(detail.peg), 'peg'], ['Gross Margin', pct(detail.grossMargin), 'grossMargin']],
+    [['Net Income', fmt(detail.epsTrailing && detail.sharesOutstanding ? detail.epsTrailing * detail.sharesOutstanding : undefined), 'netIncome'], ['P/S', fmt(detail.priceToSales), 'ps'], ['Oper. Margin', pct(detail.operatingMargin), 'operatingMargin']],
+    [['Shares Out', fmt(detail.sharesOutstanding), 'sharesOutstanding'], ['P/B', fmt(detail.priceToBook), 'pb'], ['Profit Margin', pct(detail.profitMargin), 'profitMargin']],
+    [['Float', fmt(detail.floatShares), 'float'], ['EV/EBITDA', fmt(detail.evToEbitda), 'evEbitda'], ['ROE', pct(detail.returnOnEquity), 'roe']],
+    [['Prev Close', '$' + fmt(detail.prevClose), ''], ['ROA', pct(detail.returnOnAssets), 'roa'], ['Beta', fmt(detail.beta), 'beta']],
+    [['Open', '$' + fmt(detail.open), ''], ['Debt/Eq', fmt(detail.debtToEquity), 'debtEquity'], ['Book/sh', '$' + fmt(detail.bookValue), 'bookValue']],
+    [['Day High', '$' + fmt(detail.dayHigh), ''], ['Current Ratio', fmt(detail.currentRatio), 'currentRatio'], ['SMA 50', '$' + fmt(detail.fiftyDayAvg), 'sma50']],
+    [['Day Low', '$' + fmt(detail.dayLow), ''], ['Quick Ratio', fmt(detail.quickRatio), 'quickRatio'], ['SMA 200', '$' + fmt(detail.twoHundredDayAvg), 'sma200']],
+    [['52W High', '$' + fmt(detail.fiftyTwoWeekHigh), 'fiftyTwoWeekHigh'], ['Volume', fmt(detail.volume, 0), 'volume'], ['Short Ratio', fmt(detail.shortRatio), 'shortRatio']],
+    [['52W Low', '$' + fmt(detail.fiftyTwoWeekLow), 'fiftyTwoWeekLow'], ['Avg Volume', fmt(detail.avgVolume, 0), 'avgVolume'], ['Short % Float', pct(detail.shortPercentOfFloat), 'shortPercent']],
+    [['Dividend', detail.dividendRate ? `$${fmt(detail.dividendRate)} (${pct(detail.dividendYield)})` : '—', 'dividendYield'], ['Payout Ratio', pct(detail.payoutRatio), 'payoutRatio'], ['Sector', detail.sector || '—', 'sector']],
+    [['Ex-Div Date', detail.exDividendDate ? new Date(detail.exDividendDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—', 'exDivDate'], ['Industry', detail.industry || '—', ''], ['Employees', detail.employees ? detail.employees.toLocaleString() : '—', '']],
   ];
 
   return (
@@ -290,9 +291,11 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
         <tbody>
           {statsRows.map((row, ri) => (
             <tr key={ri}>
-              {row.map(([label, value]) => (
+              {row.map(([label, value, metricKey]) => (
                 <>
-                  <td key={label + '-l'} className="stat-label">{label}</td>
+                  <td key={label + '-l'} className="stat-label">
+                    {metricKey ? <MetricTooltip metricKey={metricKey}>{label}</MetricTooltip> : label}
+                  </td>
                   <td key={label + '-v'} className="stat-value">{value}</td>
                 </>
               ))}
