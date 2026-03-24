@@ -89,6 +89,7 @@ export default function WatchlistView({ quotes, onSelectStock }: WatchlistViewPr
   const [tickers] = useLocalStorage<string[]>('xtox-watchlist', []);
   const [extraQuotes, setExtraQuotes] = useState<Record<string, Quote>>({});
   const [charts, setCharts] = useState<Record<string, number[]>>({});
+  const [logos, setLogos] = useState<Record<string, string>>({});
   const heatmapRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ w: 600, h: 180 });
 
@@ -125,6 +126,17 @@ export default function WatchlistView({ quotes, onSelectStock }: WatchlistViewPr
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
+
+  // Fetch Finnhub logos for tickers without local logo
+  useEffect(() => {
+    tickers.forEach(sym => {
+      if (getLogoUrl(sym) || logos[sym]) return;
+      fetch(`/api/profile/${sym}`)
+        .then(r => r.json())
+        .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [sym]: data.logo })); })
+        .catch(() => {});
+    });
+  }, [tickers]);
 
   const getQuote = (sym: string): Quote | undefined => quoteMap.get(sym) || extraQuotes[sym];
 
@@ -192,7 +204,7 @@ export default function WatchlistView({ quotes, onSelectStock }: WatchlistViewPr
       <div className="watchlist-view-grid">
         {tickers.map(sym => {
           const q = getQuote(sym);
-          const logo = getLogoUrl(sym);
+          const logo = getLogoUrl(sym) || logos[sym] || null;
           const data = charts[sym] || [];
           const up = (q?.changePercent || 0) >= 0;
 

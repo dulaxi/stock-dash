@@ -23,6 +23,7 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
   const [showDropdown, setShowDropdown] = useState(false);
   const [extraQuotes, setExtraQuotes] = useState<Record<string, Quote>>({});
   const [charts, setCharts] = useState<Record<string, number[]>>({});
+  const [logos, setLogos] = useState<Record<string, string>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   const quoteMap = new Map(quotes.map(q => [q.symbol, q]));
@@ -50,7 +51,19 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
     });
   }, [tickers]);
 
+  // Fetch Finnhub logos for tickers without local logo
+  useEffect(() => {
+    tickers.forEach(sym => {
+      if (getLogoUrl(sym) || logos[sym]) return;
+      fetch(`/api/profile/${sym}`)
+        .then(r => r.json())
+        .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [sym]: data.logo })); })
+        .catch(() => {});
+    });
+  }, [tickers]);
+
   const getQuote = (sym: string): Quote | undefined => quoteMap.get(sym) || extraQuotes[sym];
+  const getLogo = (sym: string): string | null => getLogoUrl(sym) || logos[sym] || null;
 
   // Local matches (instant)
   const localResults = search
@@ -122,7 +135,7 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
         )}
         {tickers.slice(0, 8).map(sym => {
           const q = getQuote(sym);
-          const logo = getLogoUrl(sym);
+          const logo = getLogo(sym);
           const data = charts[sym] || [];
           const up = (q?.changePercent || 0) >= 0;
           return (
