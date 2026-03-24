@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Quote } from '../types';
 import type { ScreenerFilters } from './ScreenerFilters';
 import ScreenerFiltersBar, { EMPTY_FILTERS } from './ScreenerFilters';
@@ -75,6 +75,20 @@ export default function ScreenerView({ quotes, onSelectStock, onNavigate }: Scre
   const [filters, setFilters] = useState<ScreenerFilters>({ ...EMPTY_FILTERS });
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [logos, setLogos] = useState<Record<string, string>>({});
+
+  // Fetch Finnhub logos for stocks without local logo
+  useEffect(() => {
+    const missing = quotes.filter(q => !getLogoUrl(q.symbol) && !logos[q.symbol]);
+    missing.forEach(q => {
+      fetch(`/api/profile/${q.symbol}`)
+        .then(r => r.json())
+        .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [q.symbol]: data.logo })); })
+        .catch(() => {});
+    });
+  }, [quotes]);
+
+  const getLogo = (sym: string): string | null => logos[sym] || getLogoUrl(sym) || null;
 
   const availableSectors = useMemo(() => {
     const sectors = new Set<string>();
@@ -167,10 +181,10 @@ export default function ScreenerView({ quotes, onSelectStock, onNavigate }: Scre
             {sorted.map(q => (
               <tr key={q.symbol} className="clickable-row" onClick={() => onSelectStock(q.symbol)}>
                 <td className="symbol">
-                  {getLogoUrl(q.symbol) && (
+                  {getLogo(q.symbol) && (
                     <img
                       className="ticker-logo"
-                      src={getLogoUrl(q.symbol)!}
+                      src={getLogo(q.symbol)!}
                       alt=""
                       onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
