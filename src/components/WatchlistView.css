@@ -11,6 +11,17 @@
   margin-bottom: 16px;
 }
 
+.watchlist-heatmap {
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.watchlist-heatmap svg {
+  display: block;
+}
+
 .watchlist-view-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
