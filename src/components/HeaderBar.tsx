@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Market, Quote } from '../types';
 import { getLogoUrl } from '../tickerDomains';
 import { MagnifyingGlass, Sun, Moon } from '@phosphor-icons/react';
@@ -16,6 +16,12 @@ interface HeaderBarProps {
   onBackToDashboard: () => void;
 }
 
+interface SearchResult {
+  symbol: string;
+  description: string;
+  type: string;
+}
+
 const MARKETS: { value: Market; label: string }[] = [
   { value: 'all' as Market, label: 'All' },
   { value: 'nasdaq', label: 'NDQ' },
@@ -30,11 +36,37 @@ export default function HeaderBar({
   const [search, setSearch] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [apiResults, setApiResults] = useState<SearchResult[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const results = search
-    ? quotes.filter(q => q.symbol.toLowerCase().startsWith(search.toLowerCase())).slice(0, 8)
+  // Local matches from loaded quotes (instant)
+  const localMatches = search
+    ? quotes.filter(q => q.symbol.toLowerCase().startsWith(search.toLowerCase())).slice(0, 4)
     : [];
+
+  // Fetch from /api/search for universal results (debounced)
+  useEffect(() => {
+    if (!search || search.length < 1) {
+      setApiResults([]);
+      return;
+    }
+
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetch(`/api/search?q=${encodeURIComponent(search)}`)
+        .then(r => r.json())
+        .then((data: SearchResult[]) => setApiResults(data))
+        .catch(() => setApiResults([]));
+    }, 200);
+
+    return () => clearTimeout(debounceRef.current);
+  }, [search]);
+
+  // Merge local + API results, deduplicate, local first
+  const localSymbols = new Set(localMatches.map(q => q.symbol));
+  const apiFiltered = apiResults.filter(r => !localSymbols.has(r.symbol));
+  const hasResults = localMatches.length > 0 || apiFiltered.length > 0;
 
   const statusLabel = marketStatus === 'open' ? 'Market Open'
     : marketStatus === 'pre' ? 'Pre-Market' : 'Market Closed';
@@ -56,11 +88,12 @@ export default function HeaderBar({
           onChange={e => { setSearch(e.target.value); setShowResults(true); }}
           onFocus={() => setShowResults(true)}
           onBlur={() => setTimeout(() => { setShowResults(false); setExpanded(false); setSearch(''); }, 150)}
-          placeholder="Search ticker..."
+          placeholder="Search any stock..."
         />
-        {expanded && showResults && results.length > 0 && (
+        {expanded && showResults && hasResults && (
           <div className="header-bar-search-results">
-            {results.map(q => {
+            {/* Local matches (with live price data) */}
+            {localMatches.map(q => {
               const logo = getLogoUrl(q.symbol);
               return (
                 <button key={q.symbol} className="search-item"
@@ -69,9 +102,7 @@ export default function HeaderBar({
                     {logo && <img className="search-item-logo" src={logo} alt=""
                       onError={e => (e.currentTarget.style.display = 'none')} />}
                     <span className="search-item-symbol">{q.symbol}</span>
-                    {(q as Record<string, unknown>).shortName && (
-                      <span className="search-item-name">{String((q as Record<string, unknown>).shortName)}</span>
-                    )}
+                    <span className="search-item-name">{q.shortName || ''}</span>
                   </div>
                   <span style={{ color: q.changePercent >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
                     {q.changePercent >= 0 ? '+' : ''}{q.changePercent?.toFixed(2)}%
@@ -79,6 +110,16 @@ export default function HeaderBar({
                 </button>
               );
             })}
+            {/* API results (universal search, no price yet) */}
+            {apiFiltered.map(r => (
+              <button key={r.symbol} className="search-item"
+                onMouseDown={() => { onSelectStock(r.symbol); setSearch(''); setExpanded(false); }}>
+                <div className="search-item-left">
+                  <span className="search-item-symbol">{r.symbol}</span>
+                  <span className="search-item-name">{r.description}</span>
+                </div>
+              </button>
+            ))}
           </div>
         )}
       </div>

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import YahooFinance from 'yahoo-finance2';
 import { MARKET_MAP, INDEX_SYMBOLS, ALL_SYMBOLS } from './symbols.js';
@@ -7,6 +8,15 @@ import { cacheGet, cacheSet } from './cache.js';
 const yahooFinance = new YahooFinance();
 const app = express();
 const PORT = 3001;
+
+// Finnhub API for universal search + supplementary data
+const FINNHUB_KEY = process.env.FINNHUB_API_KEY || '';
+async function finnhubFetch(path) {
+  const url = `https://finnhub.io/api/v1${path}${path.includes('?') ? '&' : '?'}token=${FINNHUB_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Finnhub ${res.status}`);
+  return res.json();
+}
 
 function mapQuote(q) {
   return {
@@ -175,6 +185,73 @@ app.get('/api/sectors', async (req, res) => {
 
   cacheSet(key, sectors, 30000);
   res.json(sectors);
+});
+
+// GET /api/search?q= — universal stock search via Finnhub
+app.get('/api/search', async (req, res) => {
+  const q = (req.query.q || '').toString().trim();
+  if (!q) return res.json([]);
+
+  // First check local symbols for instant matches
+  const localMatches = ALL_SYMBOLS
+    .filter(s => s.toLowerCase().startsWith(q.toLowerCase()))
+    .slice(0, 5);
+
+  if (!FINNHUB_KEY) {
+    // No Finnhub key — return local matches only
+    return res.json(localMatches.map(s => ({ symbol: s, description: s, type: 'local' })));
+  }
+
+  const cacheKey = `search-${q.toLowerCase()}`;
+  const cached = cacheGet(cacheKey);
+  if (cached && !cached.stale) return res.json(cached.data);
+
+  try {
+    const data = await finnhubFetch(`/search?q=${encodeURIComponent(q)}`);
+    const results = (data.result || [])
+      .filter(r => r.type === 'Common Stock' && !r.symbol.includes('.'))
+      .slice(0, 10)
+      .map(r => ({
+        symbol: r.symbol,
+        description: r.description,
+        type: r.type,
+      }));
+    cacheSet(cacheKey, results, 300000); // 5 min cache
+    res.json(results);
+  } catch (e) {
+    // Fallback to local matches
+    res.json(localMatches.map(s => ({ symbol: s, description: s, type: 'local' })));
+  }
+});
+
+// GET /api/profile/:symbol — company profile via Finnhub
+app.get('/api/profile/:symbol', async (req, res) => {
+  const symbol = req.params.symbol.toUpperCase();
+  const cacheKey = `profile-${symbol}`;
+  const cached = cacheGet(cacheKey);
+  if (cached && !cached.stale) return res.json(cached.data);
+
+  if (!FINNHUB_KEY) return res.json({});
+
+  try {
+    const data = await finnhubFetch(`/stock/profile2?symbol=${symbol}`);
+    const profile = {
+      name: data.name,
+      logo: data.logo,
+      industry: data.finnhubIndustry,
+      country: data.country,
+      exchange: data.exchange,
+      ipo: data.ipo,
+      weburl: data.weburl,
+      marketCap: data.marketCapitalization ? data.marketCapitalization * 1e6 : null, // Finnhub returns in millions
+      shareOutstanding: data.shareOutstanding ? data.shareOutstanding * 1e6 : null,
+    };
+    cacheSet(cacheKey, profile, 86400000); // 24hr cache — profiles rarely change
+    res.json(profile);
+  } catch (e) {
+    if (cached) return res.json(cached.data);
+    res.json({});
+  }
 });
 
 // GET /api/chart/:symbol (intraday)
