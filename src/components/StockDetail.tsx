@@ -170,14 +170,12 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
     return () => clearInterval(interval);
   }, [symbol]);
 
-  // Fetch Finnhub logo as fallback when local logo isn't available
+  // Fetch Finnhub logo for all stocks (higher quality than Google favicon)
   useEffect(() => {
-    if (!getLogoUrl(symbol)) {
-      fetch(`/api/profile/${encodeURIComponent(symbol)}`)
-        .then(r => r.json())
-        .then(data => { if (data.logo) setFinnhubLogo(data.logo); })
-        .catch(() => {});
-    }
+    fetch(`/api/profile/${encodeURIComponent(symbol)}`)
+      .then(r => r.json())
+      .then(data => { if (data.logo) setFinnhubLogo(data.logo); })
+      .catch(() => {});
   }, [symbol]);
 
   useEffect(() => {
@@ -224,10 +222,10 @@ export function StockDetail({ symbol, onBack }: StockDetailProps) {
 
       <div className="detail-header">
         <div className="detail-title">
-          {(getLogoUrl(detail.symbol) || finnhubLogo) && (
+          {(finnhubLogo || getLogoUrl(detail.symbol)) && (
             <img
               className="detail-logo"
-              src={getLogoUrl(detail.symbol) || finnhubLogo!}
+              src={finnhubLogo || getLogoUrl(detail.symbol)!}
               alt=""
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
