@@ -1,5 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 import type { Quote } from '../types';
+import { getLogoUrl } from '../tickerDomains';
 import './HeatmapView.css';
 
 interface HeatmapViewProps {
@@ -120,6 +121,17 @@ export function HeatmapView({ quotes, onSelectStock, onNavigate }: HeatmapViewPr
   const [hover, setHover] = useState<TreeNode | null>(null);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [groupMode, setGroupMode] = useState<GroupMode>('marketcap');
+  const [logos, setLogos] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    quotes.forEach(q => {
+      if (getLogoUrl(q.symbol) || logos[q.symbol]) return;
+      fetch(`/api/profile/${q.symbol}`)
+        .then(r => r.json())
+        .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [q.symbol]: data.logo })); })
+        .catch(() => {});
+    });
+  }, [quotes]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -270,8 +282,16 @@ export function HeatmapView({ quotes, onSelectStock, onNavigate }: HeatmapViewPr
       </div>
       {hover && (
         <div className="heatmap-tooltip" style={{ left: mouse.x + 12, top: mouse.y - 50, position: 'fixed' }}>
-          <div className="heatmap-tooltip-symbol">{hover.symbol}</div>
-          {hover.shortName && <div className="heatmap-tooltip-name">{hover.shortName}</div>}
+          <div className="heatmap-tooltip-header">
+            {(logos[hover.symbol] || getLogoUrl(hover.symbol)) && (
+              <img className="heatmap-tooltip-logo" src={logos[hover.symbol] || getLogoUrl(hover.symbol)!} alt=""
+                onError={e => (e.currentTarget.style.display = 'none')} />
+            )}
+            <div>
+              <div className="heatmap-tooltip-symbol">{hover.symbol}</div>
+              {hover.shortName && <div className="heatmap-tooltip-name">{hover.shortName}</div>}
+            </div>
+          </div>
           {hover.sector && <div className="heatmap-tooltip-sector">{hover.sector}</div>}
           <div className="heatmap-tooltip-price">${hover.price?.toFixed(2)}</div>
           <div style={{ color: hover.changePercent >= 0 ? 'var(--positive)' : 'var(--negative)', fontWeight: 600 }}>
