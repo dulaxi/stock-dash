@@ -20,6 +20,7 @@ interface SearchResult {
   symbol: string;
   description: string;
   type: string;
+  logo?: string | null;
 }
 
 const MARKETS: { value: Market; label: string }[] = [
@@ -110,11 +111,13 @@ export default function HeaderBar({
                 </button>
               );
             })}
-            {/* API results (universal search, no price yet) */}
+            {/* API results (universal search) */}
             {apiFiltered.map(r => (
               <button key={r.symbol} className="search-item"
                 onMouseDown={() => { onSelectStock(r.symbol); setSearch(''); setExpanded(false); }}>
                 <div className="search-item-left">
+                  {r.logo && <img className="search-item-logo" src={r.logo} alt=""
+                    onError={e => (e.currentTarget.style.display = 'none')} />}
                   <span className="search-item-symbol">{r.symbol}</span>
                   <span className="search-item-name">{r.description}</span>
                 </div>

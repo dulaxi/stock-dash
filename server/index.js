@@ -198,7 +198,6 @@ app.get('/api/search', async (req, res) => {
     .slice(0, 5);
 
   if (!FINNHUB_KEY) {
-    // No Finnhub key — return local matches only
     return res.json(localMatches.map(s => ({ symbol: s, description: s, type: 'local' })));
   }
 
@@ -216,11 +215,29 @@ app.get('/api/search', async (req, res) => {
         description: r.description,
         type: r.type,
       }));
-    cacheSet(cacheKey, results, 300000); // 5 min cache
-    res.json(results);
+
+    // Fetch logos for top results in parallel (best-effort)
+    const withLogos = await Promise.all(results.map(async (r) => {
+      const profileKey = `profile-${r.symbol}`;
+      const profileCached = cacheGet(profileKey);
+      if (profileCached) return { ...r, logo: profileCached.data.logo || null };
+      try {
+        const profile = await finnhubFetch(`/stock/profile2?symbol=${r.symbol}`);
+        const profileData = {
+          name: profile.name, logo: profile.logo,
+          industry: profile.finnhubIndustry, country: profile.country,
+          exchange: profile.exchange, weburl: profile.weburl,
+          marketCap: profile.marketCapitalization ? profile.marketCapitalization * 1e6 : null,
+        };
+        cacheSet(profileKey, profileData, 86400000);
+        return { ...r, logo: profile.logo || null };
+      } catch { return { ...r, logo: null }; }
+    }));
+
+    cacheSet(cacheKey, withLogos, 300000);
+    res.json(withLogos);
   } catch (e) {
-    // Fallback to local matches
-    res.json(localMatches.map(s => ({ symbol: s, description: s, type: 'local' })));
+    res.json(localMatches.map(s => ({ symbol: s, description: s, type: 'local', logo: null })));
   }
 });
 
