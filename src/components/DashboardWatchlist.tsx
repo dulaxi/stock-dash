@@ -5,6 +5,12 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { Sparkline } from './Sparkline';
 import { X } from '@phosphor-icons/react';
 
+interface SearchResult {
+  symbol: string;
+  description: string;
+  logo?: string | null;
+}
+
 interface DashboardWatchlistProps {
   quotes: Quote[];
   onSelectStock: (symbol: string) => void;
@@ -46,9 +52,30 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
 
   const getQuote = (sym: string): Quote | undefined => quoteMap.get(sym) || extraQuotes[sym];
 
-  const searchResults = search
-    ? quotes.filter(q => q.symbol.toLowerCase().startsWith(search.toLowerCase()) && !tickers.includes(q.symbol)).slice(0, 6)
+  // Local matches (instant)
+  const localResults = search
+    ? quotes.filter(q => q.symbol.toLowerCase().startsWith(search.toLowerCase()) && !tickers.includes(q.symbol)).slice(0, 3)
     : [];
+
+  // Finnhub search (debounced)
+  const [apiResults, setApiResults] = useState<SearchResult[]>([]);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (!search || search.length < 1) { setApiResults([]); return; }
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetch(`/api/search?q=${encodeURIComponent(search)}`)
+        .then(r => r.json())
+        .then((data: SearchResult[]) => setApiResults(data))
+        .catch(() => setApiResults([]));
+    }, 200);
+    return () => clearTimeout(debounceRef.current);
+  }, [search]);
+
+  const localSymbols = new Set(localResults.map(q => q.symbol));
+  const apiFiltered = apiResults.filter(r => !localSymbols.has(r.symbol) && !tickers.includes(r.symbol));
+  const hasSearchResults = localResults.length > 0 || apiFiltered.length > 0;
 
   const addTicker = (sym: string) => {
     if (!tickers.includes(sym)) setTickers([...tickers, sym]);
@@ -72,12 +99,18 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
           onFocus={() => setShowDropdown(true)}
           onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
           className="watchlist-add-input" />
-        {showDropdown && searchResults.length > 0 && (
+        {showDropdown && hasSearchResults && (
           <div className="watchlist-dropdown">
-            {searchResults.map(q => (
+            {localResults.map(q => (
               <div key={q.symbol} className="watchlist-dropdown-item"
                 onMouseDown={() => addTicker(q.symbol)}>
-                {q.symbol} {(q as Record<string, unknown>).shortName && <span className="text-secondary">&mdash; {(q as Record<string, unknown>).shortName as string}</span>}
+                {q.symbol} {q.shortName && <span className="text-secondary">&mdash; {q.shortName}</span>}
+              </div>
+            ))}
+            {apiFiltered.map(r => (
+              <div key={r.symbol} className="watchlist-dropdown-item"
+                onMouseDown={() => addTicker(r.symbol)}>
+                {r.symbol} <span className="text-secondary">&mdash; {r.description}</span>
               </div>
             ))}
           </div>
