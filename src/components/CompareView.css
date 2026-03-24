@@ -61,7 +61,7 @@
   border-radius: 10px;
   overflow: hidden;
   z-index: 100;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .compare-search-input {
@@ -277,7 +277,7 @@
 
 .compare-remove:hover {
   background: var(--negative);
-  color: #fff;
+  color: var(--text-inverse);
 }
 
 /* Section titles */
@@ -309,11 +309,11 @@
 }
 
 .compare-cell.best {
-  background: rgba(52, 199, 89, 0.08);
+  background: var(--positive-bg);
 }
 
 .compare-cell.worst {
-  background: rgba(255, 59, 48, 0.08);
+  background: var(--negative-bg);
 }
 
 /* Corner cell (top-left) */

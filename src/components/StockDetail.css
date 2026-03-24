@@ -331,7 +331,7 @@
 }
 
 .detail-mini-table tbody tr:hover {
-  background: rgba(128, 128, 128, 0.06);
+  background: var(--hover-bg);
 }
 
 .up { color: var(--positive); }
@@ -424,7 +424,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--text-inverse);
   white-space: nowrap;
   padding: 0 8px;
 }

@@ -99,7 +99,7 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-md);
   padding: 10px;
   z-index: 50;
   min-width: 200px;
@@ -221,7 +221,7 @@
   border-radius: 980px;
   border: none;
   background: var(--negative);
-  color: #fff;
+  color: var(--text-inverse);
   cursor: pointer;
   transition: opacity 0.15s;
   white-space: nowrap;
@@ -295,7 +295,7 @@
 }
 
 .screener-table .clickable-row:hover {
-  background: rgba(128, 128, 128, 0.06);
+  background: var(--hover-bg);
 }
 
 /* ── Symbol cell with logo ── */

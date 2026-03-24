@@ -95,7 +95,7 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   z-index: 200;
 }
@@ -213,7 +213,7 @@
 }
 
 .header-bar .status-dot.pre {
-  background: #ff9f0a;
+  background: var(--warning);
 }
 
 .header-bar .status-dot.closed {
