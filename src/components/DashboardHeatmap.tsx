@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 import type { Quote } from '../types';
-import { getLogoUrl } from '../tickerDomains';
+import { useLogos } from '../hooks/useLogos';
 
 interface DashboardHeatmapProps {
   quotes: Quote[];
@@ -97,17 +97,8 @@ export default function DashboardHeatmap({ quotes, onSelectStock, onSeeAll }: Da
   const [hover, setHover] = useState<TreeNode | null>(null);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [groupMode, setGroupMode] = useState<GroupMode>('marketcap');
-  const [logos, setLogos] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    quotes.forEach(q => {
-      if (getLogoUrl(q.symbol) || logos[q.symbol]) return;
-      fetch(`/api/profile/${q.symbol}`)
-        .then(r => r.json())
-        .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [q.symbol]: data.logo })); })
-        .catch(() => {});
-    });
-  }, [quotes]);
+  const logoSymbols = useMemo(() => quotes.map(q => q.symbol), [quotes]);
+  const logos = useLogos(logoSymbols);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -243,8 +234,8 @@ export default function DashboardHeatmap({ quotes, onSelectStock, onSeeAll }: Da
         {hover && (
           <div className="heatmap-tooltip" style={{ left: mouse.x + 12, top: mouse.y - 50, position: 'fixed' }}>
             <div className="heatmap-tooltip-header">
-              {(logos[hover.symbol] || getLogoUrl(hover.symbol)) && (
-                <img className="heatmap-tooltip-logo" src={logos[hover.symbol] || getLogoUrl(hover.symbol)!} alt=""
+              {logos[hover.symbol] && (
+                <img className="heatmap-tooltip-logo" src={logos[hover.symbol]} alt=""
                   onError={e => (e.currentTarget.style.display = 'none')} />
               )}
               <div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import type { Quote } from '../types';
-import { getLogoUrl } from '../tickerDomains';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useLogos } from '../hooks/useLogos';
 import { Sparkline } from './Sparkline';
 import './WatchlistView.css';
 
@@ -89,7 +89,6 @@ export default function WatchlistView({ quotes, onSelectStock }: WatchlistViewPr
   const [tickers] = useLocalStorage<string[]>('xtox-watchlist', []);
   const [extraQuotes, setExtraQuotes] = useState<Record<string, Quote>>({});
   const [charts, setCharts] = useState<Record<string, number[]>>({});
-  const [logos, setLogos] = useState<Record<string, string>>({});
   const heatmapRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ w: 600, h: 180 });
 
@@ -127,16 +126,7 @@ export default function WatchlistView({ quotes, onSelectStock }: WatchlistViewPr
     return () => obs.disconnect();
   }, []);
 
-  // Fetch Finnhub logos for all tickers (higher quality than Google favicon)
-  useEffect(() => {
-    tickers.forEach(sym => {
-      if (logos[sym]) return;
-      fetch(`/api/profile/${sym}`)
-        .then(r => r.json())
-        .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [sym]: data.logo })); })
-        .catch(() => {});
-    });
-  }, [tickers]);
+  const logos = useLogos(tickers);
 
   const getQuote = (sym: string): Quote | undefined => quoteMap.get(sym) || extraQuotes[sym];
 
@@ -204,7 +194,7 @@ export default function WatchlistView({ quotes, onSelectStock }: WatchlistViewPr
       <div className="watchlist-view-grid">
         {tickers.map(sym => {
           const q = getQuote(sym);
-          const logo = logos[sym] || getLogoUrl(sym) || null;
+          const logo = logos[sym] || null;
           const data = charts[sym] || [];
           const up = (q?.changePercent || 0) >= 0;
 

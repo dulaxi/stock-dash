@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { NewsItem } from '../types';
 import { StockChart } from './StockChart';
 import { FlashDiv } from './FlashCell';
-import { getLogoUrl } from '../tickerDomains';
+import { useLogos } from '../hooks/useLogos';
 import { ArrowLeft, ArrowRight, ArrowsLeftRight } from '@phosphor-icons/react';
 import MetricTooltip from './MetricTooltip';
 import './StockDetail.css';
@@ -156,11 +156,10 @@ export function StockDetail({ symbol, onBack, onCompare }: StockDetailProps) {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [finnhubLogo, setFinnhubLogo] = useState<string | null>(null);
+  const logos = useLogos([symbol]);
 
   useEffect(() => {
     setLoading(true);
-    setFinnhubLogo(null);
     const fetchDetail = () => {
       fetch(`/api/detail/${encodeURIComponent(symbol)}`)
         .then(r => r.json())
@@ -170,14 +169,6 @@ export function StockDetail({ symbol, onBack, onCompare }: StockDetailProps) {
     fetchDetail();
     const interval = setInterval(fetchDetail, 10000);
     return () => clearInterval(interval);
-  }, [symbol]);
-
-  // Fetch Finnhub logo for all stocks (higher quality than Google favicon)
-  useEffect(() => {
-    fetch(`/api/profile/${encodeURIComponent(symbol)}`)
-      .then(r => r.json())
-      .then(data => { if (data.logo) setFinnhubLogo(data.logo); })
-      .catch(() => {});
   }, [symbol]);
 
   useEffect(() => {
@@ -231,10 +222,10 @@ export function StockDetail({ symbol, onBack, onCompare }: StockDetailProps) {
 
       <div className="detail-header">
         <div className="detail-title">
-          {(finnhubLogo || getLogoUrl(detail.symbol)) && (
+          {logos[symbol] && (
             <img
               className="detail-logo"
-              src={finnhubLogo || getLogoUrl(detail.symbol)!}
+              src={logos[symbol]}
               alt=""
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />

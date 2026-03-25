@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Quote } from '../types';
-import { getLogoUrl } from '../tickerDomains';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useLogos } from '../hooks/useLogos';
 import { Sparkline } from './Sparkline';
 import { X } from '@phosphor-icons/react';
 
@@ -23,7 +23,6 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
   const [showDropdown, setShowDropdown] = useState(false);
   const [extraQuotes, setExtraQuotes] = useState<Record<string, Quote>>({});
   const [charts, setCharts] = useState<Record<string, number[]>>({});
-  const [logos, setLogos] = useState<Record<string, string>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   const quoteMap = new Map(quotes.map(q => [q.symbol, q]));
@@ -51,19 +50,9 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
     });
   }, [tickers]);
 
-  // Fetch Finnhub logos for all tickers (higher quality than Google favicon)
-  useEffect(() => {
-    tickers.forEach(sym => {
-      if (logos[sym]) return;
-      fetch(`/api/profile/${sym}`)
-        .then(r => r.json())
-        .then(data => { if (data.logo) setLogos(prev => ({ ...prev, [sym]: data.logo })); })
-        .catch(() => {});
-    });
-  }, [tickers]);
+  const logos = useLogos(tickers);
 
   const getQuote = (sym: string): Quote | undefined => quoteMap.get(sym) || extraQuotes[sym];
-  const getLogo = (sym: string): string | null => logos[sym] || getLogoUrl(sym) || null;
 
   // Local matches (instant)
   const localResults = search
@@ -135,7 +124,7 @@ export default function DashboardWatchlist({ quotes, onSelectStock, onSeeAll }: 
         )}
         {tickers.map(sym => {
           const q = getQuote(sym);
-          const logo = getLogo(sym);
+          const logo = logos[sym] || null;
           const data = charts[sym] || [];
           const up = (q?.changePercent || 0) >= 0;
           return (
